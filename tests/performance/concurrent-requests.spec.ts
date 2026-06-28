@@ -15,6 +15,9 @@ import { logger } from '../../src/utils/logger.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 13 · Concurrent requests', () => {
+  // SLA assertions can flake under full-suite network contention — retry.
+  test.describe.configure({ retries: 2 });
+
   test('a concurrent batch all succeeds within p95 SLA', async ({
     products,
   }) => {

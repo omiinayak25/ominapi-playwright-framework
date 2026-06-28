@@ -28,8 +28,13 @@
  * =============================================================================
  */
 import { test as base, request as playwrightRequest } from '@playwright/test';
-import { ApiClient, GraphQLClient } from '../api-client/index.js';
+import {
+  ApiClient,
+  GraphQLClient,
+  WebSocketClient,
+} from '../api-client/index.js';
 import { config } from '../config/index.js';
+import { MockWebSocketServer } from '../utils/ws-server.js';
 import {
   PostService,
   ProductService,
@@ -65,6 +70,8 @@ export interface ApiFixtures {
   graphqlZero: GraphQLClient;
   /** In-process mock server + a client pointed at it (Phase 15). */
   mock: { server: MockServer; client: ApiClient };
+  /** In-process WebSocket echo server + a client pointed at it (Phase 16). */
+  ws: { server: MockWebSocketServer; client: WebSocketClient };
 }
 
 /**
@@ -152,6 +159,17 @@ export const test = base.extend<ApiFixtures>({
       await use({ server, client: new ApiClient(context, 'mock') });
     } finally {
       await context.dispose();
+      await server.stop();
+    }
+  },
+  ws: async ({}, use) => {
+    const server = new MockWebSocketServer();
+    await server.start();
+    const client = new WebSocketClient(server.url);
+    try {
+      await use({ server, client });
+    } finally {
+      await client.close();
       await server.stop();
     }
   },

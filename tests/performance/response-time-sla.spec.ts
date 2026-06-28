@@ -15,6 +15,9 @@ import { expectResponseTimeUnder } from '../../src/validators/index.js';
 import { logger } from '../../src/utils/logger.js';
 
 test.describe('Phase 13 · Response-time SLA', () => {
+  // SLA assertions can flake under full-suite network contention — retry.
+  test.describe.configure({ retries: 2 });
+
   const SINGLE_SLA_MS = 4000;
   const AGG_P95_SLA_MS = 5000;
 

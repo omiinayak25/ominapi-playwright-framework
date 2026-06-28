@@ -11,6 +11,7 @@ export type {
   MultipartValue,
 } from './api-client.types.js';
 export { GraphQLClient, graphqlData } from './graphql-client.js';
+export { WebSocketClient } from './ws-client.js';
 export type {
   GraphQLResponse,
   GraphQLError,
