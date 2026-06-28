@@ -10,6 +10,10 @@
  */
 import type { APIResponse } from '@playwright/test';
 import type { AuthStrategy } from '../auth/auth.types.js';
+import type {
+  RequestMiddleware,
+  ResponseMiddleware,
+} from '../middleware/types.js';
 
 /** Primitive values allowed in query strings and url-encoded form bodies. */
 export type QueryValue = string | number | boolean;
@@ -23,6 +27,34 @@ export interface FilePayload {
 
 /** A value in a multipart body: a scalar field or a file part. */
 export type MultipartValue = string | number | boolean | FilePayload;
+
+/** Retry policy for transient HTTP failures. */
+export interface RetryPolicy {
+  /** Max retries after the first attempt. */
+  readonly retries: number;
+  /** Status codes that trigger a retry (default: 429, 500, 502, 503, 504). */
+  readonly retryOnStatuses?: number[];
+  /** Base backoff in ms (exponential per attempt; default 0 for tests). */
+  readonly baseDelayMs?: number;
+}
+
+/** TTL caching policy for GET responses. */
+export interface CachePolicy {
+  readonly ttlMs: number;
+}
+
+/**
+ * Optional, OPT-IN enterprise features for the ApiClient. Omitting this object
+ * yields the exact baseline behavior (no retry/cache/middleware).
+ */
+export interface ApiClientOptions {
+  readonly retry?: RetryPolicy;
+  readonly cache?: CachePolicy;
+  /** Auto-inject a correlation ID header on every request. */
+  readonly correlationId?: boolean;
+  readonly requestMiddleware?: RequestMiddleware[];
+  readonly responseMiddleware?: ResponseMiddleware[];
+}
 
 /**
  * Options accepted by every ApiClient verb. All optional — a bare GET needs none.
