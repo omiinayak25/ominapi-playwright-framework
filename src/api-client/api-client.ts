@@ -33,6 +33,7 @@ import type { APIRequestContext } from '@playwright/test';
 import { logger } from '../utils/logger.js';
 import { safeJsonParse } from '../utils/json.js';
 import type { ApiResponse, RequestOptions } from './api-client.types.js';
+import type { AuthStrategy } from '../auth/auth.types.js';
 
 /** Internal: the HTTP verbs we support, kept as a union for type safety. */
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -42,10 +43,13 @@ export class ApiClient {
    * @param context  Playwright request context (injected — Dependency Injection).
    *                  It already carries a baseURL, so callers pass only paths.
    * @param name      A label used in logs to identify which API this client hits.
+   * @param auth      OPTIONAL client-wide default auth strategy (Strategy pattern).
+   *                  Applied to every request unless overridden per-request.
    */
   public constructor(
     private readonly context: APIRequestContext,
     private readonly name: string = 'api',
+    private readonly auth?: AuthStrategy,
   ) {}
 
   /** HTTP GET — retrieve a resource. */
@@ -103,18 +107,31 @@ export class ApiClient {
       data,
       form,
       timeout,
+      auth,
       // Default false so 4xx/5xx are RETURNED (not thrown) — essential for
       // negative testing. Callers can opt into throwing per request.
       failOnStatusCode = false,
     } = options;
 
-    logger.http(`[${this.name}] → ${method} ${path}`, { params });
+    // Resolve auth (Strategy pattern): per-request `auth` overrides the client
+    // default. The chosen strategy produces headers we merge BEFORE per-request
+    // headers, so an explicit header in the call always wins.
+    const strategy = auth ?? this.auth;
+    const authHeaders = strategy ? await strategy.apply() : {};
+    const mergedHeaders = { ...authHeaders, ...(headers ?? {}) };
+
+    logger.http(
+      `[${this.name}] → ${method} ${path}`,
+      strategy ? { params, auth: strategy.scheme } : { params },
+    );
 
     const start = Date.now();
     const response = await this.context.fetch(path, {
       method,
       failOnStatusCode,
-      ...(headers ? { headers } : {}),
+      ...(Object.keys(mergedHeaders).length > 0
+        ? { headers: mergedHeaders }
+        : {}),
       ...(params ? { params } : {}),
       ...(data !== undefined ? { data } : {}),
       ...(form ? { form } : {}),

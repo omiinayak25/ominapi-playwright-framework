@@ -31,6 +31,7 @@ import { test as base, request as playwrightRequest } from '@playwright/test';
 import { ApiClient } from '../api-client/index.js';
 import { config } from '../config/index.js';
 import { PostService, ProductService } from '../services/index.js';
+import { AuthService } from '../auth/index.js';
 
 /** The set of clients & repositories this fixture module injects into tests. */
 export interface ApiFixtures {
@@ -42,6 +43,10 @@ export interface ApiFixtures {
   posts: PostService;
   /** Repository for DummyJSON /products (Phase 3 CRUD). */
   products: ProductService;
+  /** Client bound to Restful Booker — used for authenticated CRUD (Phase 4). */
+  booker: ApiClient;
+  /** Service that performs login flows to obtain tokens (Phase 4). */
+  auth: AuthService;
 }
 
 /**
@@ -84,6 +89,14 @@ export const test = base.extend<ApiFixtures>({
   products: async ({}, use) => {
     await withClient(config.endpoints.dummyJson, 'dummyjson', (c) =>
       use(new ProductService(c)),
+    );
+  },
+  booker: async ({}, use) => {
+    await withClient(config.endpoints.booker, 'booker', use);
+  },
+  auth: async ({}, use) => {
+    await withClient(config.endpoints.booker, 'booker-auth', (c) =>
+      use(new AuthService(c)),
     );
   },
 });

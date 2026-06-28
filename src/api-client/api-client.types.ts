@@ -9,6 +9,7 @@
  * =============================================================================
  */
 import type { APIResponse } from '@playwright/test';
+import type { AuthStrategy } from '../auth/auth.types.js';
 
 /** Primitive values allowed in query strings and url-encoded form bodies. */
 export type QueryValue = string | number | boolean;
@@ -38,6 +39,12 @@ export interface RequestOptions {
    * for assertion. We default to this (see ApiClient) so negative tests work.
    */
   readonly failOnStatusCode?: boolean;
+
+  /**
+   * Per-request auth strategy. Overrides any client-level default auth for THIS
+   * call only — ideal for negative tests ("same endpoint, with vs without auth").
+   */
+  readonly auth?: AuthStrategy;
 }
 
 /**
