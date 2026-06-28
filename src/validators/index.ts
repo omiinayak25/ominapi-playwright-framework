@@ -14,3 +14,8 @@ export {
   expectArrayBody,
   expectMatchesSchema,
 } from './response.validator.js';
+export {
+  findSensitiveData,
+  auditSecurityHeaders,
+} from './security.validator.js';
+export type { SecurityHeaderReport } from './security.validator.js';

@@ -56,6 +56,8 @@ export interface ApiFixtures {
   bookings: BookingService;
   /** Repository for Open Brewery DB (Phase 10 page-based pagination). */
   breweries: BreweryService;
+  /** Raw client for DummyJSON (e.g. /users, for security tests). */
+  dummyjson: ApiClient;
 }
 
 /**
@@ -117,6 +119,9 @@ export const test = base.extend<ApiFixtures>({
     await withClient(config.endpoints.openBrewery, 'breweries', (c) =>
       use(new BreweryService(c)),
     );
+  },
+  dummyjson: async ({}, use) => {
+    await withClient(config.endpoints.dummyJson, 'dummyjson-raw', use);
   },
 });
 
