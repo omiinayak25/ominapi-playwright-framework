@@ -102,7 +102,9 @@ export class ConfigManager {
         jsonPlaceholder:
           process.env.JSONPLACEHOLDER_URL ??
           'https://jsonplaceholder.typicode.com',
-        httpbin: process.env.HTTPBIN_URL ?? 'https://httpbin.org',
+        // httpbingo.org is a reliable, actively-hosted reimplementation of
+        // httpbin (the canonical httpbin.org on Heroku is frequently 503/504).
+        httpbin: process.env.HTTPBIN_URL ?? 'https://httpbingo.org',
         postmanEcho: process.env.POSTMAN_ECHO_URL ?? 'https://postman-echo.com',
       },
       credentials: {
