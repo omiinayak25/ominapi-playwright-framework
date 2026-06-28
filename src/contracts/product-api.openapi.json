@@ -1,0 +1,57 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OmniAPI Product Contract",
+    "version": "1.0.0",
+    "description": "Contract describing the Product resource (modeled on DummyJSON)."
+  },
+  "paths": {
+    "/products/{id}": {
+      "get": {
+        "operationId": "getProductById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single product",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Product" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "price",
+          "description",
+          "category",
+          "stock"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "price": { "type": "number" },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "stock": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
