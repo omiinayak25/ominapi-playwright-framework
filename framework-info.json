@@ -1,0 +1,77 @@
+{
+  "framework": "OmniAPI",
+  "version": "1.0.0",
+  "type": "API Test Automation Framework",
+  "engine": "Playwright Test",
+  "language": "TypeScript (strict)",
+  "capabilities": {
+    "protocols": ["REST", "GraphQL", "WebSocket"],
+    "authentication": [
+      "Basic",
+      "Bearer / JWT",
+      "API Key",
+      "Cookie / Session",
+      "OAuth2 (simulated)"
+    ],
+    "validation": [
+      "Status / headers / response time / size",
+      "Nested object & array assertions",
+      "JSON Schema (AJV) with drift detection",
+      "OpenAPI contract conformance",
+      "Backward-compatibility diffing"
+    ],
+    "testTypes": [
+      "Foundation (HTTP)",
+      "CRUD",
+      "Authentication",
+      "Request chaining (E2E)",
+      "Data-driven (JSON/CSV/Excel/env)",
+      "Negative / boundary",
+      "Security (OWASP: SQLi/XSS/IDOR/JWT/exposure/rate-limit)",
+      "Pagination / filter / sort / search",
+      "File upload/download (multipart, binary)",
+      "Performance (concurrency, SLA, percentiles)",
+      "GraphQL (query/mutation/variables/fragments)",
+      "Mocking (in-process fake server)",
+      "WebSocket (connect/message/reconnect/validate)",
+      "Contract testing (OpenAPI)"
+    ],
+    "resilience": [
+      "Retry with exponential backoff",
+      "Circuit breaker (closed/open/half-open)",
+      "TTL cache for GET",
+      "Request/response middleware",
+      "Correlation IDs",
+      "Secrets management (read + mask)",
+      "Typed errors (ApiError, CircuitOpenError)"
+    ],
+    "reporting": [
+      "Allure",
+      "HTML",
+      "JUnit",
+      "Custom summary",
+      "Debug body logs"
+    ],
+    "cicd": ["GitHub Actions (sharded)", "Jenkins", "Azure DevOps", "Docker"],
+    "tooling": [
+      "ESLint 9 (flat config)",
+      "Prettier",
+      "Husky + lint-staged",
+      "dotenv",
+      "winston"
+    ]
+  },
+  "designPatterns": [
+    "Singleton",
+    "Facade",
+    "Repository",
+    "Strategy",
+    "Builder",
+    "Factory",
+    "Dependency Injection",
+    "Null Object",
+    "Middleware",
+    "Circuit Breaker"
+  ],
+  "principles": ["SOLID", "Clean Code", "DRY", "KISS", "YAGNI"]
+}

@@ -1,0 +1,35 @@
+{
+  "repository": "omiinayak25/omniapi-playwright-framework",
+  "url": "https://github.com/omiinayak25/omniapi-playwright-framework",
+  "defaultBranch": "main",
+  "license": "MIT",
+  "owner": "omiinayak25",
+  "language": "TypeScript",
+  "languagesBreakdown": { "TypeScript": "98.7%", "Other": "1.3%" },
+  "lastUpdated": "2026-06-28",
+  "structure": {
+    "sourceDir": "src",
+    "testsDir": "tests",
+    "dataDir": "data",
+    "docsDir": "docs",
+    "contractsDir": "src/contracts"
+  },
+  "stats": {
+    "totalFolders": 52,
+    "sourceFiles": 66,
+    "sourceLoc": 3988,
+    "testSpecFiles": 62,
+    "testLoc": 3587,
+    "totalLoc": 7575,
+    "tests": 213,
+    "testFolders": 20
+  },
+  "ciWorkflows": [
+    ".github/workflows/ci.yml",
+    "Jenkinsfile",
+    "azure-pipelines.yml"
+  ],
+  "containerization": ["Dockerfile", ".dockerignore"],
+  "qualityGates": ["typecheck", "lint", "format:check", "test"],
+  "gitStrategy": "GitFlow + Conventional Commits"
+}
