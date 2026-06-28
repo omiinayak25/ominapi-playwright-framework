@@ -1,0 +1,3 @@
+# Pre-commit quality gate: lint + format only staged files (fast).
+# Heavy work (full typecheck + tests) belongs in CI, not every commit.
+npx lint-staged

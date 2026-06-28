@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Playwright / test artifacts
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+blob-report/
+playwright/.cache/
+
+# Environment & secrets (NEVER commit real secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

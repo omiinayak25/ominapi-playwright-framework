@@ -1,0 +1,61 @@
+{
+  // ===========================================================================
+  // tsconfig.json — TypeScript compiler contract for the whole framework
+  // -----------------------------------------------------------------------
+  // WHY IT EXISTS:
+  //   Defines how TypeScript compiles & type-checks the project. With "strict"
+  //   on, the compiler becomes a second reviewer that never sleeps — most API
+  //   contract bugs (undefined fields, wrong types) are caught BEFORE runtime.
+  //
+  // WHEN TO USE:
+  //   Always. `npm run typecheck` (tsc --noEmit) runs this in CI as a quality
+  //   gate. Playwright also reads this file (paths, target) when running tests.
+  // ===========================================================================
+  "compilerOptions": {
+    /* ---- Language & module system ---- */
+    "target": "ES2022", // Modern Node 20+ supports this natively; no down-leveling needed.
+    "module": "ESNext", // We use ES modules ("type": "module" in package.json).
+    "moduleResolution": "Bundler", // Lets Playwright's esbuild resolve imports without forced .js extensions.
+    "lib": ["ES2022"], // API-only project: no DOM types needed.
+    "types": ["node", "@playwright/test"],
+
+    /* ---- Strictness: the heart of enterprise type safety ---- */
+    "strict": true, // Enables ALL strict checks (noImplicitAny, strictNullChecks, etc.).
+    "noImplicitAny": true, // Ban implicit `any` — every value must have a known type.
+    "noUnusedLocals": true, // Dead variables become errors, keeping code clean.
+    "noUnusedParameters": true, // Same for unused function params.
+    "noImplicitReturns": true, // Every code path in a function must return consistently.
+    "noFallthroughCasesInSwitch": true, // Prevents accidental switch fall-through bugs.
+    "noUncheckedIndexedAccess": true, // arr[i] is T | undefined — forces null-safety on lookups.
+    "exactOptionalPropertyTypes": true, // `foo?: string` ≠ `foo: string | undefined`. Precise contracts.
+    "forceConsistentCasingInFileNames": true, // Avoids Linux/macOS import casing bugs in CI.
+
+    /* ---- Interop & emit ---- */
+    "esModuleInterop": true, // Clean default imports from CommonJS deps.
+    "resolveJsonModule": true, // Allows `import data from './x.json'` for data-driven tests.
+    "skipLibCheck": true, // Skip type-checking node_modules .d.ts — faster, fewer 3rd-party noise.
+    "noEmit": true, // This config only TYPE-CHECKS. Playwright handles its own transpilation.
+    "isolatedModules": true, // Each file compiles independently (required by esbuild/Playwright).
+    "verbatimModuleSyntax": true, // Enforces explicit `import type` for type-only imports.
+
+    /* ---- Path aliases: kill the ../../../ import hell ---- */
+    "baseUrl": ".",
+    "paths": {
+      "@config/*": ["src/config/*"],
+      "@utils/*": ["src/utils/*"],
+      "@constants/*": ["src/constants/*"],
+      "@types/*": ["src/types/*"],
+      "@api-client/*": ["src/api-client/*"],
+      "@services/*": ["src/services/*"],
+      "@models/*": ["src/models/*"],
+      "@builders/*": ["src/builders/*"],
+      "@auth/*": ["src/auth/*"],
+      "@validators/*": ["src/validators/*"],
+      "@schemas/*": ["src/schemas/*"],
+      "@fixtures/*": ["src/fixtures/*"],
+      "@middleware/*": ["src/middleware/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "*.ts", "*.mjs"],
+  "exclude": ["node_modules", "dist", "playwright-report", "test-results"]
+}
