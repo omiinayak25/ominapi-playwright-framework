@@ -38,22 +38,23 @@
     "isolatedModules": true, // Each file compiles independently (required by esbuild/Playwright).
     "verbatimModuleSyntax": true, // Enforces explicit `import type` for type-only imports.
 
-    /* ---- Path aliases: kill the ../../../ import hell ---- */
-    "baseUrl": ".",
+    /* ---- Path aliases: kill the ../../../ import hell ----
+       NOTE: no `baseUrl` — since TS 4.1 `paths` resolve relative to this
+       tsconfig.json, and `baseUrl` is deprecated for removal in TS 7.0. */
     "paths": {
-      "@config/*": ["src/config/*"],
-      "@utils/*": ["src/utils/*"],
-      "@constants/*": ["src/constants/*"],
-      "@types/*": ["src/types/*"],
-      "@api-client/*": ["src/api-client/*"],
-      "@services/*": ["src/services/*"],
-      "@models/*": ["src/models/*"],
-      "@builders/*": ["src/builders/*"],
-      "@auth/*": ["src/auth/*"],
-      "@validators/*": ["src/validators/*"],
-      "@schemas/*": ["src/schemas/*"],
-      "@fixtures/*": ["src/fixtures/*"],
-      "@middleware/*": ["src/middleware/*"]
+      "@config/*": ["./src/config/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@types/*": ["./src/types/*"],
+      "@api-client/*": ["./src/api-client/*"],
+      "@services/*": ["./src/services/*"],
+      "@models/*": ["./src/models/*"],
+      "@builders/*": ["./src/builders/*"],
+      "@auth/*": ["./src/auth/*"],
+      "@validators/*": ["./src/validators/*"],
+      "@schemas/*": ["./src/schemas/*"],
+      "@fixtures/*": ["./src/fixtures/*"],
+      "@middleware/*": ["./src/middleware/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "*.ts", "*.mjs"],
