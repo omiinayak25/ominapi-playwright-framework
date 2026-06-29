@@ -160,6 +160,7 @@ export const postSchema: JSONSchemaType<Post> = {
   },
 };
 
+// Array schema: reuse postSchema to validate each element of the collection
 export const postArraySchema: JSONSchemaType<Post[]> = {
   type: 'array',
   items: postSchema, // validates every element
@@ -208,15 +209,17 @@ constraints that the permissive demo API accepts but your contract should reject
 export const bookingStrictSchema: SchemaObject = {
   // same shape as bookingSchema but with value constraints:
   properties: {
+    // Length bounds reject empty or oversized names
     firstname: { type: 'string', minLength: 1, maxLength: 50 },
     lastname: { type: 'string', minLength: 1, maxLength: 50 },
-    totalprice: { type: 'integer', minimum: 1, maximum: 100000 },
+    totalprice: { type: 'integer', minimum: 1, maximum: 100000 }, // bounded price range
     depositpaid: { type: 'boolean' },
     bookingdates: {
       type: 'object',
       required: ['checkin', 'checkout'],
       additionalProperties: false,
       properties: {
+        // format: 'date' enforces ISO YYYY-MM-DD strings
         checkin: { type: 'string', format: 'date' },
         checkout: { type: 'string', format: 'date' },
       },
@@ -336,12 +339,12 @@ import { expectMatchesSchema } from '../../src/validators/index.js';
 import { postSchema } from '../../src/schemas/index.js';
 
 test('a real post conforms to postSchema', async ({ posts }) => {
-  const res = await posts.getById(1);
+  const res = await posts.getById(1); // fetch one post
   expectMatchesSchema(res, postSchema); // one call validates the whole body
 });
 
 test('the posts collection conforms to postArraySchema', async ({ posts }) => {
-  const res = await posts.getAll();
+  const res = await posts.getAll(); // fetch the collection
   expectMatchesSchema(res, postArraySchema); // validates every item in the array
 });
 ```
@@ -351,11 +354,12 @@ For nested responses (e.g. `{ booking: {...} }`) call `SchemaValidator` directly
 ```typescript
 test('a created booking conforms to bookingSchema', async ({ booker }) => {
   const res = await booker.post<CreateBookingResponse>('/booking', {
-    data: BookingFactory.valid(),
+    data: BookingFactory.valid(), // generated valid payload
   });
-  const validator = SchemaValidator.getInstance();
+  const validator = SchemaValidator.getInstance(); // shared singleton + cache
+  // Validate the nested booking object, not the whole envelope
   const result = validator.validate(bookingSchema, res.body.booking);
-  expect(result.valid, result.errors.join('; ')).toBe(true);
+  expect(result.valid, result.errors.join('; ')).toBe(true); // surface all errors on failure
 });
 ```
 

@@ -143,11 +143,12 @@ Because every call returns `ApiResponse<T>`, assertions are uniform across the
 entire framework:
 
 ```typescript
-expect(res.status).toBe(200);
-expect(res.ok).toBe(true);
-expect(res.isJson).toBe(true);
-expect(res.durationMs).toBeLessThan(2000);
-expect(res.body.firstname).toBe('John');
+// Every field below is populated by the client on each call, so assertions look identical everywhere
+expect(res.status).toBe(200); // exact HTTP status
+expect(res.ok).toBe(true); // 2xx convenience flag
+expect(res.isJson).toBe(true); // body was parsed as JSON
+expect(res.durationMs).toBeLessThan(2000); // SLA / timing check
+expect(res.body.firstname).toBe('John'); // typed body access
 ```
 
 ---
@@ -211,12 +212,14 @@ appended to the request middleware chain and injects a UUID as
 ### Basic GET (from fixtures)
 
 ```typescript
+// Import test/expect from the fixtures module, not @playwright/test, to get injected clients
 import { test, expect } from '../../src/fixtures/api.fixtures.js';
 
+// `httpbin` is the client injected by the fixture system
 test('GET /get echoes headers', async ({ httpbin }) => {
   const res = await httpbin.get('/get', {
-    headers: { 'x-custom': 'omni' },
-    params: { env: 'staging' },
+    headers: { 'x-custom': 'omni' }, // merged over the client's default headers
+    params: { env: 'staging' }, // serialized to ?env=staging
   });
 
   expect(res.status).toBe(200);
@@ -231,10 +234,11 @@ test('GET /get echoes headers', async ({ httpbin }) => {
 test('JSON body is serialized correctly', async ({ echo }) => {
   const payload = { framework: 'OminAPI', nested: { level: 2 } };
 
+  // `data` sets a JSON body and Content-Type: application/json automatically
   const res = await echo.post<PostmanEcho>('/post', { data: payload });
 
   expect(res.status).toBe(200);
-  expect(res.body.json).toEqual(payload);
+  expect(res.body.json).toEqual(payload); // echo server reflects the parsed JSON back
 });
 ```
 
@@ -243,9 +247,10 @@ test('JSON body is serialized correctly', async ({ echo }) => {
 ```typescript
 test('url-encoded form body is transmitted', async ({ echo }) => {
   const res = await echo.post<PostmanEcho>('/post', {
-    form: { username: 'omni', remember: true },
+    form: { username: 'omni', remember: true }, // `form` sends x-www-form-urlencoded instead of JSON
   });
 
+  // form values arrive as strings, so the boolean becomes 'true'
   expect(res.body.form).toMatchObject({ username: 'omni', remember: 'true' });
 });
 ```
@@ -264,10 +269,11 @@ expect(unauthed.status).toBe(403);
 ### Opt-in retry + TTL cache
 
 ```typescript
+// Enterprise features are enabled purely through the 4th constructor argument (auth left undefined here)
 const client = new ApiClient(context, 'resilient', undefined, {
-  retry: { retries: 3, baseDelayMs: 100, retryOnStatuses: [429, 503] },
-  cache: { ttlMs: 5000 },
-  correlationId: true,
+  retry: { retries: 3, baseDelayMs: 100, retryOnStatuses: [429, 503] }, // retry 429/503 with exponential backoff
+  cache: { ttlMs: 5000 }, // cache successful GETs for 5s
+  correlationId: true, // auto-inject an x-correlation-id header
 });
 ```
 
@@ -275,9 +281,11 @@ const client = new ApiClient(context, 'resilient', undefined, {
 
 ```typescript
 test('create -> read -> update -> delete', async ({ auth, bookings }) => {
+  // Shared context carries values from one step to the next (request chaining)
   const ctx: { token?: string; bookingId?: number } = {};
 
   await test.step('login', async () => {
+    // Obtain a token to authorize the later delete
     ctx.token = await auth.loginBooker(
       config.credentials.username,
       config.credentials.password,
@@ -286,15 +294,15 @@ test('create -> read -> update -> delete', async ({ auth, bookings }) => {
 
   await test.step('create', async () => {
     const res = await bookings.create(
-      BookingFactory.forGuest('Chain', 'Tester'),
+      BookingFactory.forGuest('Chain', 'Tester'), // factory builds a valid booking payload
     );
-    ctx.bookingId = res.body.bookingid;
+    ctx.bookingId = res.body.bookingid; // capture the new id for the next step
   });
 
   await test.step('delete', async () => {
-    const strategy = new CookieTokenStrategy(ctx.token!);
+    const strategy = new CookieTokenStrategy(ctx.token!); // auth from the token captured at login
     const res = await bookings.remove(ctx.bookingId!, strategy);
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(201); // Restful Booker returns 201 on successful delete
   });
 });
 ```
@@ -327,8 +335,9 @@ Helper function `graphqlData<T>(res)` unwraps `.body.data` and throws if
 into a real test failure.
 
 ```typescript
+// Run a GraphQL query; the response still arrives as a standard ApiResponse
 const res = await countries.query<CountriesData>(COUNTRIES_QUERY);
-const data = graphqlData(res); // throws if errors present
+const data = graphqlData(res); // unwraps .body.data; throws if errors present
 expect(data.countries.length).toBeGreaterThan(0);
 ```
 
@@ -356,9 +365,9 @@ class WebSocketClient {
 
 ```typescript
 test('echo round-trip', async ({ ws }) => {
-  await ws.client.connect();
+  await ws.client.connect(); // open the socket and wait until it is ready
   ws.client.send('hello');
-  const reply = await ws.client.waitForMessage();
+  const reply = await ws.client.waitForMessage(); // Promise resolves on next message (buffered, race-free)
   expect(reply).toBe('echo:hello');
 });
 ```

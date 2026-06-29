@@ -51,7 +51,9 @@ All five strategies implement `AuthStrategy.apply(headers)`:
 
 ```typescript
 // src/auth/strategies/basic-auth.strategy.ts
+// Each strategy mutates the headers map in place; the client calls apply() before every request
 apply(headers: Record<string, string>): void {
+  // Set HTTP Basic auth: base64-encoded "user:pass"
   headers['Authorization'] = `Basic ${Buffer.from(...).toString('base64')}`;
 }
 ```
@@ -95,10 +97,11 @@ OminAPI, Playwright's `test.extend()` mechanism is used in
 `src/fixtures/api.fixtures.ts`:
 
 ```typescript
+// Extend Playwright's base test with custom fixtures
 export const test = base.extend<Fixtures>({
   bookingService: async ({ request }, use) => {
-    const client = new ApiClient(request, bookingOptions);
-    await use(new BookingService(client));
+    const client = new ApiClient(request, bookingOptions); // build the dependency from the injected request context
+    await use(new BookingService(client)); // hand the ready service to the test
     // automatic teardown after test
   },
 });
@@ -342,7 +345,9 @@ just that individual endpoints return 200 in isolation.
 Parameterized tests iterate over the loaded rows:
 
 ```typescript
+// Load rows once at module scope (outside the tests)
 const users = await DataLoader.loadJson<User[]>('data/users.json');
+// Generate one test per data row — adding a scenario means adding a row, not code
 for (const user of users) {
   test(`login: ${user.email}`, async ({ authService }) => {
     const token = await authService.login(user.email, user.password);

@@ -145,6 +145,7 @@ GraphQL/WebSockets, mock dependencies, and wire enterprise-grade CI/CD.
 ### 1. Clone
 
 ```bash
+# Clone the repository, then enter the project directory
 git clone https://github.com/omiinayak25/ominapi-playwright-framework.git
 cd ominapi-playwright-framework
 ```
@@ -158,6 +159,7 @@ nvm use        # reads .nvmrc (Node 22)
 ### 3. Install dependencies
 
 ```bash
+# Install all dependencies (Playwright, AJV, faker, etc.) from package-lock
 npm install
 ```
 
@@ -185,8 +187,9 @@ npm run allure:open      # open the Allure report
 ### 7. Docker usage
 
 ```bash
+# Build the test image from the Dockerfile, tagging it "ominapi"
 docker build -t ominapi .
-docker run --rm ominapi          # runs `npm run test:ci`
+docker run --rm ominapi          # runs `npm run test:ci` (--rm cleans up the container after)
 ```
 
 ### 8. CI/CD usage

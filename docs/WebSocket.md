@@ -161,16 +161,16 @@ test('client connects and the server registers the connection', async ({
 }) => {
   const { server, client } = ws;
 
-  expect(client.isOpen()).toBe(false);
+  expect(client.isOpen()).toBe(false); // not yet connected
   await client.connect();
 
-  expect(client.isOpen()).toBe(true);
-  expect(server.connectionCount).toBe(1);
+  expect(client.isOpen()).toBe(true); // socket is now open
+  expect(server.connectionCount).toBe(1); // server saw exactly one handshake
 });
 
 test('connecting to a dead port rejects', async ({ ws }) => {
-  await ws.server.stop();
-  await expect(ws.client.connect(1500)).rejects.toThrow();
+  await ws.server.stop(); // kill the server so the port is closed
+  await expect(ws.client.connect(1500)).rejects.toThrow(); // connect times out / errors
 });
 ```
 
@@ -183,7 +183,7 @@ test('text message round-trips (echo)', async ({ ws }) => {
   await client.connect();
 
   client.send('hello');
-  const reply = await client.waitForMessage();
+  const reply = await client.waitForMessage(); // server echoes back the message
   expect(reply).toBe('echo:hello');
 });
 
@@ -191,7 +191,7 @@ test('JSON message round-trips', async ({ ws }) => {
   const { client } = ws;
   await client.connect();
 
-  client.send({ type: 'ping', seq: 1 });
+  client.send({ type: 'ping', seq: 1 }); // object is JSON-serialized before sending
   const reply = await client.waitForMessage();
   // Server echoes "echo:" + the serialized JSON
   expect(reply).toBe('echo:{"type":"ping","seq":1}');
@@ -206,10 +206,11 @@ test('multiple messages are received in order', async ({ ws }) => {
   const { client } = ws;
   await client.connect();
 
-  client.send('a');
+  client.send('a'); // send three messages in quick succession
   client.send('b');
   client.send('c');
 
+  // Drain the buffer in FIFO order — replies come back in the order sent
   expect(await client.waitForMessage()).toBe('echo:a');
   expect(await client.waitForMessage()).toBe('echo:b');
   expect(await client.waitForMessage()).toBe('echo:c');
@@ -225,8 +226,8 @@ test('server records what it received', async ({ ws }) => {
   await client.connect();
 
   client.send('spy-me');
-  await client.waitForMessage();
-  expect(server.received).toContain('spy-me');
+  await client.waitForMessage(); // wait for the echo so the server has processed it
+  expect(server.received).toContain('spy-me'); // spy array records the raw inbound message
 });
 ```
 
@@ -239,7 +240,7 @@ test('clean disconnect closes the socket', async ({ ws }) => {
   await client.connect();
   expect(client.isOpen()).toBe(true);
 
-  await client.close();
+  await client.close(); // graceful close (code 1000)
   expect(client.isOpen()).toBe(false);
 });
 
@@ -247,7 +248,7 @@ test('sending after close throws a clear error', async ({ ws }) => {
   const { client } = ws;
   await client.connect();
   await client.close();
-  expect(() => client.send('too late')).toThrow(/not open/);
+  expect(() => client.send('too late')).toThrow(/not open/); // guard rejects sends on a closed socket
 });
 ```
 
@@ -284,6 +285,7 @@ test('reconnect restores messaging after a server-side drop', async ({
 import { SchemaValidator } from '../../src/validators/index.js';
 import type { SchemaObject } from 'ajv';
 
+// JSON Schema the inbound message must satisfy: object with string `type` + integer `seq`
 const messageSchema: SchemaObject = {
   type: 'object',
   required: ['type', 'seq'],
@@ -298,15 +300,16 @@ test('a received JSON message conforms to its schema', async ({ ws }) => {
   const { client } = ws;
   await client.connect();
 
-  client.send({ type: 'event', seq: 7 });
+  client.send({ type: 'event', seq: 7 }); // valid payload matching the schema
   const reply = await client.waitForMessage();
 
   // Strip the server's "echo:" prefix to recover the JSON payload.
   const json = reply.replace(/^echo:/, '');
   const parsed = JSON.parse(json) as unknown;
 
+  // Validate against the schema via the shared (singleton) AJV validator
   const result = SchemaValidator.getInstance().validate(messageSchema, parsed);
-  expect(result.valid, result.errors.join('; ')).toBe(true);
+  expect(result.valid, result.errors.join('; ')).toBe(true); // error message surfaces failed fields
 });
 
 test('an invalid message shape is detected', async ({ ws }) => {
@@ -318,7 +321,7 @@ test('an invalid message shape is detected', async ({ ws }) => {
   const parsed = JSON.parse(reply.replace(/^echo:/, '')) as unknown;
 
   const result = SchemaValidator.getInstance().validate(messageSchema, parsed);
-  expect(result.valid).toBe(false);
+  expect(result.valid).toBe(false); // fails because required `seq` is absent
 });
 ```
 
@@ -397,11 +400,12 @@ The `ws` fixture (defined in `src/fixtures/api.fixtures.ts`) starts a fresh
 // src/fixtures/api.fixtures.ts
 ws: async ({}, use) => {
   const server = new MockWebSocketServer();
-  await server.start();
-  const client = new WebSocketClient(server.url);
+  await server.start(); // bind to an ephemeral port
+  const client = new WebSocketClient(server.url); // point client at the just-started server
   try {
-    await use({ server, client });
+    await use({ server, client }); // hand server + client to the test
   } finally {
+    // Teardown always runs, even on test failure — prevents leaked sockets
     await client.close();
     await server.stop();
   }
@@ -414,10 +418,10 @@ in-process, offline tests only.
 
 ```ts
 // Direct construction — no fixture needed for external targets
-const client = new WebSocketClient('wss://echo.example.com/ws');
+const client = new WebSocketClient('wss://echo.example.com/ws'); // real remote endpoint
 await client.connect();
 client.send('probe');
-const reply = await client.waitForMessage();
+const reply = await client.waitForMessage(); // awaits the remote server's response
 ```
 
 ---

@@ -19,6 +19,7 @@ logging, auth, and response normalization. OminAPI removes all of that boilerpla
 so a test expresses intent only:
 
 ```typescript
+// Factory builds a valid payload; service handles headers/parsing/auth
 const res = await bookings.create(BookingFactory.valid());
 expect(res.status).toBe(201);
 ```

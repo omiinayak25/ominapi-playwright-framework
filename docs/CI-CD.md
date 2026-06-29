@@ -31,12 +31,14 @@ OminAPI ships with three CI pipeline definitions and a Docker image. All three p
 [`../src/global-setup.ts`](../src/global-setup.ts) runs once before the entire suite. It imports `ConfigManager`, which validates the environment and throws on misconfiguration. A run banner is logged to CI output:
 
 ```ts
+// Runs once before the whole suite; importing config validates the env and throws on misconfig
 export default function globalSetup(): void {
+  // Log a run banner so CI output records which config the suite started with
   logger.info('OminAPI suite starting', {
     env: config.env,
     baseUrl: config.baseUrl,
     logLevel: config.logLevel,
-    ci: !!process.env.CI,
+    ci: !!process.env.CI, // true when running under any CI provider
   });
 }
 ```
@@ -52,6 +54,7 @@ If the config is invalid, the banner never appears and the run fails with a clea
 ### Triggers
 
 ```yaml
+# Trigger the pipeline on pushes and PRs targeting main or develop
 on:
   push:
     branches: [main, develop]
@@ -62,6 +65,7 @@ on:
 ### Concurrency
 
 ```yaml
+# One concurrent run per git ref; cancel any superseded run to save CI minutes
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -88,11 +92,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run format:check
+          cache: npm # cache the npm download dir keyed on package-lock.json
+      - run: npm ci # deterministic install from the lockfile
+      - run: npm run typecheck # tsc --noEmit
+      - run: npm run lint # ESLint
+      - run: npm run format:check # Prettier check (no writes)
 ```
 
 Failure here cancels all downstream jobs. Cheap static analysis runs first.
@@ -101,15 +105,16 @@ Failure here cancels all downstream jobs. Cheap static analysis runs first.
 
 ```yaml
 test:
-  needs: quality
+  needs: quality # only runs after the quality gate passes
   strategy:
-    fail-fast: false
+    fail-fast: false # let every shard finish so all failures surface
     matrix:
-      shard: [1, 2, 3, 4]
+      shard: [1, 2, 3, 4] # fan out into 4 parallel shard jobs
   steps:
+    # Run this shard's slice of the suite; blob format is required for later merge
     - run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=blob
     - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
+      if: ${{ !cancelled() }} # upload even on test failure for debugging
       with:
         name: blob-report-${{ matrix.shard }}
         path: blob-report
@@ -124,22 +129,22 @@ test:
 
 ```yaml
 report:
-  needs: test
-  if: ${{ !cancelled() }}
+  needs: test # runs after all shards complete
+  if: ${{ !cancelled() }} # still merge even if some shards failed
   steps:
     - name: Download all blob reports
       uses: actions/download-artifact@v4
       with:
         path: all-blobs
-        pattern: blob-report-*
-        merge-multiple: true
+        pattern: blob-report-* # grab every per-shard blob artifact
+        merge-multiple: true # collapse them into one directory
     - name: Merge into a single HTML report
       run: npx playwright merge-reports --reporter=html ./all-blobs
     - uses: actions/upload-artifact@v4
       with:
         name: playwright-html-report
         path: playwright-report
-        retention-days: 14
+        retention-days: 14 # keep the merged report longer than raw blobs
 ```
 
 The merged `playwright-report/` artifact is retained for 14 days.
@@ -164,6 +169,7 @@ Quality gate sub-stages run in parallel:
 
 ```groovy
 stage('Quality gate') {
+  // Independent static checks run concurrently to minimize gate latency
   parallel {
     stage('Typecheck') { steps { sh 'npm run typecheck' } }
     stage('Lint')      { steps { sh 'npm run lint' } }
@@ -176,8 +182,10 @@ stage('Quality gate') {
 
 ```groovy
 post {
-  always {
+  always { // run whether the build passed or failed
+    // Publish JUnit results to the Jenkins test trend page
     junit testResults: 'test-results/junit-results.xml', allowEmptyResults: true
+    // Archive the HTML report, allure results, and summary for post-mortem
     archiveArtifacts artifacts: 'playwright-report/**, allure-results/**, test-results/summary.json',
                      allowEmptyArchive: true
   }
@@ -203,6 +211,7 @@ Two sequential stages. Both run on `ubuntu-latest`.
 ### Quality Stage
 
 ```yaml
+# First stage: cheap static checks gate the test stage
 - stage: Quality
   jobs:
     - job: static_checks
@@ -216,19 +225,19 @@ Two sequential stages. Both run on `ubuntu-latest`.
 
 ```yaml
 - stage: Test
-  dependsOn: Quality
+  dependsOn: Quality # only starts once the Quality stage succeeds
   jobs:
     - job: run_tests
       steps:
         - script: npm run test:ci
         - task: PublishTestResults@2
-          condition: always()
+          condition: always() # publish results even if tests failed
           inputs:
             testResultsFormat: JUnit
             testResultsFiles: 'test-results/junit-results.xml'
             testRunTitle: OminAPI
         - task: PublishBuildArtifacts@1
-          condition: always()
+          condition: always() # always upload the HTML report artifact
           inputs:
             PathtoPublish: playwright-report
             ArtifactName: playwright-report
@@ -251,10 +260,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . .
+COPY . . # copy source last so edits don't bust the npm ci cache layer
 
-ENV CI=true
-CMD ["npm", "run", "test:ci"]
+ENV CI=true # enables forbidOnly, retries, and worker capping
+CMD ["npm", "run", "test:ci"] # default container entrypoint
 ```
 
 - **Base image:** `node:22-bookworm-slim` — same image as the Jenkins agent. No browser dependencies needed for an API-only suite.
@@ -264,13 +273,14 @@ CMD ["npm", "run", "test:ci"]
 ### Run locally in Docker
 
 ```bash
-docker build -t ominapi .
-docker run --rm ominapi
+docker build -t ominapi .   # build the image, tagged 'ominapi'
+docker run --rm ominapi      # run the suite; --rm removes the container after exit
 ```
 
 ### Pass environment variables
 
 ```bash
+# Override config at runtime via -e flags without rebuilding the image
 docker run --rm \
   -e BASE_URL=https://staging.example.com \
   -e LOG_LEVEL=warn \

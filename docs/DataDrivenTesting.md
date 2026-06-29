@@ -115,9 +115,10 @@ interface StatusCase {
 const cases = loadJson<StatusCase[]>('status-cases.json');
 
 test.describe('Phase 8 · JSON-driven status codes', () => {
+  // One generated test() per data row (loop runs at collection time).
   for (const c of cases) {
     test(`${c.name} -> HTTP ${c.code}`, async ({ echo }) => {
-      const res = await echo.get(`/status/${c.code}`);
+      const res = await echo.get(`/status/${c.code}`); // ask the echo API for that status
       expect(res.status).toBe(c.code);
       expect(res.ok).toBe(c.ok);
     });
@@ -159,7 +160,7 @@ interface BookingRow {
   additionalneeds: string;
 }
 
-const rows = loadCsv<BookingRow>('bookings.csv');
+const rows = loadCsv<BookingRow>('bookings.csv'); // sync load; every value is a string
 
 for (const row of rows) {
   test(`creates booking for ${row.firstname} ${row.lastname}`, async ({
@@ -206,8 +207,10 @@ test('every spreadsheet row validates against the live product API', async ({
   const rows = await loadExcel<ProductRow>('products.xlsx');
   expect(rows.length).toBeGreaterThan(0);
 
+  // Validate each spreadsheet row against the live API inside this one test.
   for (const row of rows) {
     const res = await products.getById(Number(row.productId));
+    // Second expect() arg labels which row failed in the report.
     expect(res.status, `product ${row.productId}`).toBe(HttpStatus.OK);
     expect(res.body.price).toBeGreaterThanOrEqual(Number(row.minPrice));
   }
@@ -260,6 +263,7 @@ test(`loads and uses the dataset for env="${config.env}"`, async ({
 **Switch environments:**
 
 ```bash
+# TEST_ENV drives which data/env/<name>.json dataset the test loads
 TEST_ENV=staging npx playwright test tests/data-driven/environment-data.spec.ts
 ```
 

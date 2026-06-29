@@ -121,8 +121,8 @@ results into the HTML report requires **Java 8+** on `PATH`.
    ```
 2. Re-run:
    ```bash
-   npm run allure:report   # generates allure-report/
-   npm run allure:open     # opens in browser
+   npm run allure:report   # generates allure-report/ (requires Java on PATH)
+   npm run allure:open     # opens the generated report in a browser
    ```
 
 > The Playwright HTML report (`npm run test:report`) does **not** require Java
@@ -207,7 +207,7 @@ Playwright fail fast if any `test.only` or `describe.only` is found.
 **Fix:** Search and remove all `.only` occurrences:
 
 ```bash
-grep -r "\.only(" tests/
+grep -r "\.only(" tests/          # find every leftover test.only / describe.only
 # Edit the offending files, then re-commit.
 ```
 

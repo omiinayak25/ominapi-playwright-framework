@@ -54,6 +54,7 @@ export const logger: winston.Logger;
 ```typescript
 import { logger } from '../utils/logger.js';
 
+// Each call emits a timestamped, leveled line; the metadata object is logged as JSON
 logger.info('Booking created', { id: 42 });
 logger.http('[booker] → POST /booking', { params: {} });
 logger.debug('[booker] response body', { body: parsed.data });
@@ -165,6 +166,7 @@ returned as exceljs `CellValue` types.
 const cases = loadCsv<{ username: string; password: string }>(
   'login-cases.csv',
 );
+// Generate a separate test at collection time for each row in the dataset
 for (const row of cases) {
   test(`login ${row.username}`, async ({ api }) => {
     /* ... */
@@ -204,9 +206,10 @@ export class PaginationHelper {
 Termination: a page returning fewer items than `pageSize` signals the last page.
 
 ```typescript
+// Closure adapts page math (helper is 0-based; Brewery API is 1-based, hence page + 1)
 const allBreweries = await PaginationHelper.collectAll(
   (page, size) => breweries.getPage(page + 1, size).then((r) => r.body),
-  { pageSize: 50 },
+  { pageSize: 50 }, // fetch 50 per request until a short page signals the end
 );
 ```
 
@@ -292,9 +295,10 @@ export class PerfHelper {
 individual duration and the total wall-clock time.
 
 ```typescript
+// Fire 10 concurrent GETs and capture each call's duration
 const batch = await PerfHelper.runBatch(() => api.get('/products'), 10);
-const stats = PerfHelper.stats(batch.durations);
-expect(stats.p95).toBeLessThan(3000);
+const stats = PerfHelper.stats(batch.durations); // compute latency percentiles
+expect(stats.p95).toBeLessThan(3000); // 95th-percentile latency under 3s
 expect(batch.totalMs).toBeLessThan(5000); // truly concurrent, not sequential
 ```
 
@@ -364,9 +368,9 @@ after all attempts are exhausted.
 
 ```typescript
 const result = await withRetry(() => apiClient.get('/flaky-endpoint'), {
-  retries: 3,
-  baseDelayMs: 200,
-  shouldRetry: (e) => e instanceof NetworkError,
+  retries: 3, // up to 3 attempts before rethrowing the last error
+  baseDelayMs: 200, // backoff: 200ms, 400ms, 800ms (200 * 2^attempt)
+  shouldRetry: (e) => e instanceof NetworkError, // only retry network errors
 });
 ```
 
@@ -490,8 +494,10 @@ export class MockServer {
 to assert the client sent the correct body and headers.
 
 ```typescript
+// Register a fixed canned response for the route
 server.stub('POST', '/booking', { status: 201, body: { bookingid: 99 } });
 await client.post('/booking', { data: payload });
+// Spy assertion: confirm the client actually sent the expected body
 expect(server.requests[0].body).toMatchObject(payload);
 ```
 
@@ -584,10 +590,12 @@ export class OpenApiContract {
 Unresolved `$ref` or a missing operation throws with a clear message (fail fast).
 
 ```typescript
+// Load the committed spec from src/contracts/
 const contract = OpenApiContract.fromFile('products-v1.json');
+// Extract the 200-response schema for GET /products/{id}
 const schema = contract.getResponseSchema('/products/{id}', 'get', '200');
 // schema is now self-contained JSON Schema (all $refs inlined)
-expectMatchesSchema(res, schema);
+expectMatchesSchema(res, schema); // validate the live response against it
 ```
 
 ---

@@ -41,15 +41,15 @@ npm run test:crud         # tests/crud/
 For any other phase, pass the folder directly to Playwright:
 
 ```bash
-npx playwright test tests/graphql
-npx playwright test tests/performance
+npx playwright test tests/graphql       # run just the GraphQL phase folder
+npx playwright test tests/performance   # run just the performance phase folder
 ```
 
 To run a single file or a named test:
 
 ```bash
-npx playwright test tests/crud/posts.crud.spec.ts
-npx playwright test -g "JWT"
+npx playwright test tests/crud/posts.crud.spec.ts   # run a single spec file
+npx playwright test -g "JWT"                         # run tests whose title matches "JWT"
 ```
 
 ---
@@ -59,6 +59,7 @@ npx playwright test -g "JWT"
 Set `TEST_ENV` and `BASE_URL` (or any other env var checked by `ConfigManager`):
 
 ```bash
+# Point the suite at the staging environment for this run only
 TEST_ENV=staging BASE_URL=https://staging.example.com npm test
 ```
 
@@ -74,8 +75,8 @@ Per-environment data files live in `data/env/`.
 Set `LOG_LEVEL=debug`:
 
 ```bash
-LOG_LEVEL=debug npm test
-LOG_LEVEL=debug npx playwright test tests/authentication
+LOG_LEVEL=debug npm test                              # full suite with body logging
+LOG_LEVEL=debug npx playwright test tests/authentication   # one phase with body logging
 ```
 
 The Winston logger in `src/utils/logger.ts` prints full request/response bodies
@@ -86,7 +87,7 @@ at the `debug` level.
 ### Q6. How do I run tests in Docker?
 
 ```bash
-docker build -t ominapi .
+docker build -t ominapi .         # build the image (installs deps from Dockerfile)
 docker run --rm ominapi          # runs `npm run test:ci` inside the container
 ```
 

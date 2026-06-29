@@ -65,6 +65,7 @@ export class ConfigManager {
   }
 
   public static getInstance(): ConfigManager {
+    // Create the instance on first access, then reuse it forever
     ConfigManager.instance ??= new ConfigManager(); // lazy init, once
     return ConfigManager.instance;
   }
@@ -108,6 +109,7 @@ without touching a single test.
 
 ```typescript
 export class ApiClient {
+  // Each public verb is a thin wrapper that delegates to the shared send()
   public async get<T>(
     path: string,
     options?: RequestOptions,
@@ -168,9 +170,10 @@ The Repository is the single place that knows `/booking` and its conventions.
 export abstract class BaseApiService {
   protected constructor(
     protected readonly client: ApiClient,
-    protected readonly resource: string,
+    protected readonly resource: string, // base path, e.g. '/booking'
   ) {}
 
+  // Build a per-resource URL once, instead of interpolating in every method
   protected url(id: number | string): string {
     return `${this.resource}/${id}`;
   }
@@ -178,7 +181,7 @@ export abstract class BaseApiService {
 
 export class BookingService extends BaseApiService {
   constructor(client: ApiClient) {
-    super(client, '/booking');
+    super(client, '/booking'); // bind this service to the /booking resource
   }
 
   create(booking: Booking) {
@@ -241,6 +244,7 @@ export class BasicAuthStrategy implements AuthStrategy {
     private readonly password: string,
   ) {}
   apply(): AuthHeaders {
+    // Encode "user:pass" as base64 per the HTTP Basic auth scheme
     const encoded = Buffer.from(`${this.username}:${this.password}`).toString(
       'base64',
     );
@@ -249,8 +253,8 @@ export class BasicAuthStrategy implements AuthStrategy {
 }
 
 // ApiClient resolution (per-request overrides client default)
-const strategy = auth ?? this.auth;
-const authHeaders = strategy ? await strategy.apply() : {};
+const strategy = auth ?? this.auth; // prefer the per-request strategy if given
+const authHeaders = strategy ? await strategy.apply() : {}; // await: apply() may be async
 ```
 
 ---
@@ -286,6 +290,7 @@ seeds valid random defaults via Faker so only the field under test needs overrid
 export class BookingBuilder {
   private constructor(private readonly draft: BookingDraft) {}
 
+  // Entry point: seed every field with a valid random default via Faker
   public static aBooking(): BookingBuilder {
     return new BookingBuilder({
       firstname: faker.person.firstName(),
@@ -310,7 +315,7 @@ export class BookingBuilder {
     return this;
   }
   withoutAdditionalNeeds(): this {
-    delete this.draft.additionalneeds;
+    delete this.draft.additionalneeds; // drop an optional field entirely
     return this;
   }
 
@@ -319,7 +324,7 @@ export class BookingBuilder {
   }
 }
 
-// Usage
+// Usage: start from valid defaults, override only the fields under test
 const booking = BookingBuilder.aBooking()
   .withFirstname('John')
   .withTotalPrice(500)
@@ -358,14 +363,16 @@ methods communicate the scenario by intent.
 ```typescript
 export class BookingFactory {
   static valid(): Booking {
-    return BookingBuilder.aBooking().build();
+    return BookingBuilder.aBooking().build(); // a fully valid booking
   }
 
   static minimal(): Booking {
+    // Valid booking with the optional additionalNeeds field omitted
     return BookingBuilder.aBooking().withoutAdditionalNeeds().build();
   }
 
   static forGuest(firstname: string, lastname: string): Booking {
+    // Named scenario: a valid booking for a specific guest
     return BookingBuilder.aBooking()
       .withFirstname(firstname)
       .withLastname(lastname)
@@ -420,24 +427,26 @@ async function withClient(
     timeout: config.timeoutMs,
   });
   try {
-    await run(new ApiClient(context, name));
+    await run(new ApiClient(context, name)); // hand the client to the test body
   } finally {
     await context.dispose(); // guaranteed even if the test throws
   }
 }
 
+// Register fixtures: each lazily builds, injects, and tears down its client
 export const test = base.extend<ApiFixtures>({
   httpbin: async ({}, use) => {
     await withClient(config.endpoints.httpbin, 'httpbin', use);
   },
   bookings: async ({}, use) => {
+    // Wrap the raw client in the BookingService before injecting it
     await withClient(config.endpoints.booker, 'bookings', (c) =>
       use(new BookingService(c)),
     );
   },
 });
 
-// Test file — zero plumbing
+// Test file — zero plumbing; the `bookings` service arrives ready to use
 test('create booking', async ({ bookings }) => {
   const res = await bookings.create(BookingFactory.valid());
   expect(res.status).toBe(200);
@@ -481,7 +490,7 @@ export class NoAuthStrategy implements AuthStrategy {
 }
 
 // Usage (negative test: endpoint requires auth, this should return 403)
-const res = await booker.del('/booking/1', { auth: new NoAuthStrategy() });
+const res = await booker.del('/booking/1', { auth: new NoAuthStrategy() }); // send no auth on purpose
 expect(res.status).toBe(403);
 ```
 
@@ -526,14 +535,15 @@ export function correlationIdMiddleware(
   headerName = 'x-correlation-id',
 ): RequestMiddleware {
   return (ctx) => {
+    // Case-insensitive check so we don't overwrite a caller-supplied header
     const already = Object.keys(ctx.headers).some(
       (k) => k.toLowerCase() === headerName.toLowerCase(),
     );
-    if (!already) ctx.headers[headerName] = uuid();
+    if (!already) ctx.headers[headerName] = uuid(); // inject a fresh id only if absent
   };
 }
 
-// ApiClient: run the chain before each fetch
+// ApiClient: run each registered middleware against the outgoing request
 for (const mw of this.requestMiddleware) {
   mw({ method, path, headers: mergedHeaders });
 }
@@ -592,6 +602,7 @@ export class CircuitBreaker {
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'open') {
+      // Cooldown elapsed → allow one trial call; otherwise fail fast
       if (Date.now() - this.openedAt >= this.cooldownMs) {
         this.state = 'half-open';
       } else {
@@ -600,15 +611,16 @@ export class CircuitBreaker {
     }
     try {
       const result = await fn();
-      this.onSuccess();
+      this.onSuccess(); // reset failure count, close the circuit
       return result;
     } catch (error) {
-      this.onFailure();
+      this.onFailure(); // bump count, open the circuit if threshold reached
       throw error;
     }
   }
 
   reset(): void {
+    // Return to a clean closed state (used between test scenarios)
     this.state = 'closed';
     this.failures = 0;
   }

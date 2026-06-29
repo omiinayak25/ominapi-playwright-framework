@@ -99,6 +99,7 @@ flowchart TD
 Three exported constant arrays — all `readonly string[]`:
 
 ```ts
+// Classic SQL injection strings aimed at auth/where-clause bypass
 export const SQL_INJECTION_PAYLOADS: readonly string[] = [
   "' OR '1'='1",
   "'; DROP TABLE users;--",
@@ -107,6 +108,7 @@ export const SQL_INJECTION_PAYLOADS: readonly string[] = [
   '" OR ""="',
 ];
 
+// Stored/reflected XSS vectors — the API must round-trip these as inert data
 export const XSS_PAYLOADS: readonly string[] = [
   "<script>alert('xss')</script>",
   '<img src=x onerror=alert(1)>',
@@ -114,6 +116,7 @@ export const XSS_PAYLOADS: readonly string[] = [
   'javascript:alert(1)',
 ];
 
+// Directory-traversal strings, including raw and URL-encoded variants
 export const PATH_TRAVERSAL_PAYLOADS: readonly string[] = [
   '../../etc/passwd',
   '..\\..\\windows\\system32\\config\\sam',
@@ -132,12 +135,12 @@ export const PATH_TRAVERSAL_PAYLOADS: readonly string[] = [
 
 ```ts
 // Forge a tampered token where role is escalated to "admin"
-const original = createJwt({ sub: '1234', role: 'user' });
-const tampered = tamperPayload(original, { role: 'admin' });
+const original = createJwt({ sub: '1234', role: 'user' }); // baseline user token
+const tampered = tamperPayload(original, { role: 'admin' }); // claims changed, sig stale
 // decoded.payload.role === 'admin', but signature still matches the original payload
 
 // Produce an alg:none token — a secure server must reject this
-const none = toAlgNone(original);
+const none = toAlgNone(original); // strips the signature, sets alg to "none"
 // none ends with '.' (empty signature segment)
 ```
 
@@ -150,11 +153,12 @@ Recursively walks any JSON value and returns the dot-path of every key whose nam
 Sensitive keys scanned: `password`, `passwd`, `pwd`, `secret`, `apikey`, `api_key`, `privatekey`, `private_key`, `ssn`, `creditcard`.
 
 ```ts
+// Deep-scan an object; returns dot-paths of any sensitive, non-empty keys
 const hits = findSensitiveData({
   id: 1,
   username: 'bob',
   password: 'hunter2',
-  nested: { apiKey: 'sk-123' },
+  nested: { apiKey: 'sk-123' }, // nested keys are reported with their path
 });
 // hits === ['password', 'nested.apiKey']
 ```
@@ -191,11 +195,13 @@ test('FINDING: DummyJSON /users exposes plaintext passwords', async ({
   dummyjson,
 }) => {
   const res = await dummyjson.get('/users', {
+    // Ask only for the fields needed to demonstrate the leak
     params: { limit: 1, select: 'username,password' },
   });
   const hits = findSensitiveData(res.body);
+  // Test passes precisely because the leak IS present and detected
   expect(hits.some((h) => h.toLowerCase().includes('password'))).toBe(true);
-  logger.warn('Security finding: /users exposes password fields', { hits });
+  logger.warn('Security finding: /users exposes password fields', { hits }); // record it in CI artifacts
 });
 ```
 
@@ -216,12 +222,14 @@ Against a production signature-verifying API, sending a tampered-payload or alg:
 ### Run all security tests
 
 ```bash
+# Run every spec under the security suite
 npx playwright test tests/security
 ```
 
 ### Run a specific category
 
 ```bash
+# Pass a single spec path to run just one attack category
 npx playwright test tests/security/injection.spec.ts
 npx playwright test tests/security/data-exposure-headers.spec.ts
 npx playwright test tests/security/jwt-manipulation.spec.ts
@@ -232,13 +240,14 @@ npx playwright test tests/security/jwt-manipulation.spec.ts
 ```ts
 import { SQL_INJECTION_PAYLOADS } from '../../src/constants/security-payloads.js';
 
+// Generate one parameterized test per payload from the central corpus
 for (const payload of SQL_INJECTION_PAYLOADS) {
   test(`SQLi login is not bypassed: ${payload}`, async ({ booker }) => {
     const res = await booker.post('/auth', {
       data: { username: payload, password: payload },
     });
-    expect(res.status).toBeLessThan(500);
-    expect(res.body.token).toBeUndefined();
+    expect(res.status).toBeLessThan(500); // invariant: server never crashes
+    expect(res.body.token).toBeUndefined(); // and never issues a session
   });
 }
 ```

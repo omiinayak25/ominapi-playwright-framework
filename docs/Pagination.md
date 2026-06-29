@@ -46,15 +46,16 @@ export interface CollectAllOptions {
 }
 
 export class PaginationHelper {
+  // Iterate page-by-page and accumulate every item into a single array.
   public static async collectAll<T>(
     fetchPage: PageFetcher<T>,
     options: CollectAllOptions = {},
   ): Promise<T[]> {
-    const pageSize = options.pageSize ?? 20;
-    const maxPages = options.maxPages ?? 100;
+    const pageSize = options.pageSize ?? 20; // fall back to defaults when omitted
+    const maxPages = options.maxPages ?? 100; // hard safety cap on iterations
     const all: T[] = [];
     for (let page = 0; page < maxPages; page++) {
-      const items = await fetchPage(page, pageSize);
+      const items = await fetchPage(page, pageSize); // caller-supplied fetch closure
       all.push(...items);
       if (items.length < pageSize) break; // short/empty page = last page
     }
@@ -105,9 +106,10 @@ interface ProductList {
 ### Repository method
 
 ```typescript
+// Fetch one offset page: skip=<offset>, limit=<count>.
 public getAll(limit = 30, skip = 0): Promise<ApiResponse<ProductList>> {
   return this.client.get<ProductList>(this.resource, {
-    params: { limit, skip },
+    params: { limit, skip }, // DummyJSON offset/limit query params
   });
 }
 ```
@@ -118,27 +120,27 @@ public getAll(limit = 30, skip = 0): Promise<ApiResponse<ProductList>> {
 // tests/pagination/offset-pagination.spec.ts
 
 test('a page honors limit and reports a stable total', async ({ products }) => {
-  const res = await products.getAll(5, 0);
-  expect(res.body.products).toHaveLength(5);
-  expect(res.body.limit).toBe(5);
-  expect(res.body.total).toBeGreaterThan(5);
+  const res = await products.getAll(5, 0); // first page of 5
+  expect(res.body.products).toHaveLength(5); // page size is respected
+  expect(res.body.limit).toBe(5); // server echoes the applied limit
+  expect(res.body.total).toBeGreaterThan(5); // collection is larger than one page
 });
 
 test('consecutive pages do not overlap', async ({ products }) => {
-  const page1 = await products.getAll(5, 0);
-  const page2 = await products.getAll(5, 5);
+  const page1 = await products.getAll(5, 0); // items 0-4
+  const page2 = await products.getAll(5, 5); // items 5-9
 
   const ids1 = page1.body.products.map((p) => p.id);
   const ids2 = page2.body.products.map((p) => p.id);
-  const overlap = ids1.filter((id) => ids2.includes(id));
+  const overlap = ids1.filter((id) => ids2.includes(id)); // ids shared by both pages
 
-  expect(overlap).toHaveLength(0);
+  expect(overlap).toHaveLength(0); // adjacent pages are disjoint
   expect(page1.body.total).toBe(page2.body.total); // total is stable
 });
 
 test('skipping past the end yields an empty page', async ({ products }) => {
-  const res = await products.getAll(5, 100_000);
-  expect(res.body.products).toHaveLength(0);
+  const res = await products.getAll(5, 100_000); // skip far beyond the dataset
+  expect(res.body.products).toHaveLength(0); // empty page, not an error
 });
 ```
 
@@ -154,13 +156,13 @@ test('CURSOR-style: treat skip as an opaque cursor advanced each call', async ({
   products,
 }) => {
   const pageSize = 4;
-  let cursor = 0;
+  let cursor = 0; // opaque cursor == current skip offset
   const firstBatch = (await products.getAll(pageSize, cursor)).body.products;
   cursor += pageSize; // advance the cursor
   const secondBatch = (await products.getAll(pageSize, cursor)).body.products;
 
-  expect(firstBatch).toHaveLength(pageSize);
-  expect(secondBatch[0]?.id).not.toBe(firstBatch[0]?.id);
+  expect(firstBatch).toHaveLength(pageSize); // full first page
+  expect(secondBatch[0]?.id).not.toBe(firstBatch[0]?.id); // cursor moved forward
 });
 ```
 
@@ -177,15 +179,17 @@ Open Brewery DB uses `?page=<n>&per_page=<count>` with **1-based** page numbers.
 // Includes the /v1 API prefix in the resource path:
 super(client, '/v1/breweries');
 
+// Fetch one 1-based page using page/per_page params; returns a bare array.
 public getPage(page: number, perPage: number): Promise<ApiResponse<Brewery[]>> {
   return this.client.get<Brewery[]>(this.resource, {
     params: { page, per_page: perPage },
   });
 }
 
+// Query the /meta endpoint for totals, optionally scoped to a state.
 public meta(byState?: string): Promise<ApiResponse<BreweryMeta>> {
   return this.client.get<BreweryMeta>(`${this.resource}/meta`, {
-    ...(byState ? { params: { by_state: byState } } : {}),
+    ...(byState ? { params: { by_state: byState } } : {}), // only send filter when provided
   });
 }
 ```
@@ -196,8 +200,8 @@ public meta(byState?: string): Promise<ApiResponse<BreweryMeta>> {
 // tests/pagination/page-pagination.spec.ts
 
 test('per_page is honored', async ({ breweries }) => {
-  const res = await breweries.getPage(1, 3);
-  expect(res.body).toHaveLength(3);
+  const res = await breweries.getPage(1, 3); // page 1, 3 per page
+  expect(res.body).toHaveLength(3); // exactly per_page records returned
 });
 
 test('different pages return different records', async ({ breweries }) => {
@@ -205,12 +209,12 @@ test('different pages return different records', async ({ breweries }) => {
   const p2 = await breweries.getPage(2, 3);
   const ids1 = p1.body.map((b) => b.id);
   const ids2 = p2.body.map((b) => b.id);
-  expect(ids1.filter((id) => ids2.includes(id))).toHaveLength(0);
+  expect(ids1.filter((id) => ids2.includes(id))).toHaveLength(0); // no overlap across pages
 });
 
 test('meta reports a positive total', async ({ breweries }) => {
-  const res = await breweries.meta();
-  expect(Number(res.body.total)).toBeGreaterThan(0);
+  const res = await breweries.meta(); // total comes from a separate endpoint
+  expect(Number(res.body.total)).toBeGreaterThan(0); // total is a numeric string
 });
 ```
 
@@ -225,6 +229,7 @@ test('meta reports a positive total', async ({ breweries }) => {
 ```typescript
 const all = await PaginationHelper.collectAll<Product>(
   async (pageIndex, pageSize) => {
+    // Translate 0-based pageIndex into a skip offset for DummyJSON.
     const res = await products.getAll(pageSize, pageIndex * pageSize);
     return res.body.products; // unwrap the envelope here
   },
@@ -233,8 +238,8 @@ const all = await PaginationHelper.collectAll<Product>(
 
 // Global invariant: no duplicate ids across the entire dataset.
 const ids = all.map((p) => p.id);
-const uniqueIds = new Set(ids);
-expect(ids.length).toBe(uniqueIds.size);
+const uniqueIds = new Set(ids); // de-duplicate via Set
+expect(ids.length).toBe(uniqueIds.size); // equal sizes => zero duplicates
 ```
 
 ### Page-based (Open Brewery DB)
@@ -262,15 +267,16 @@ Collection endpoints support result shaping beyond pagination. Assert semantics 
 ### Sort (DummyJSON)
 
 ```typescript
-const res = await products.sortedBy('price', 'asc', 10);
+const res = await products.sortedBy('price', 'asc', 10); // ask API to sort by price ascending
 const prices = res.body.products.map((p) => p.price);
-const sorted = [...prices].sort((a, b) => a - b);
+const sorted = [...prices].sort((a, b) => a - b); // independently sort a copy
 expect(prices).toEqual(sorted); // order is genuinely ascending
 ```
 
 Repository method:
 
 ```typescript
+// Server-side sort via DummyJSON's sortBy/order params.
 public sortedBy(field: string, order: 'asc' | 'desc' = 'asc', limit = 30) {
   return this.client.get<ProductList>(this.resource, {
     params: { sortBy: field, order, limit },
@@ -281,7 +287,7 @@ public sortedBy(field: string, order: 'asc' | 'desc' = 'asc', limit = 30) {
 ### Filter — every item matches
 
 ```typescript
-const res = await products.byCategory('smartphones', 10);
+const res = await products.byCategory('smartphones', 10); // category-filtered page
 for (const p of res.body.products) {
   expect(p.category).toBe('smartphones'); // every item matches, not just some
 }
@@ -290,6 +296,7 @@ for (const p of res.body.products) {
 Repository method (category filter):
 
 ```typescript
+// Category filter lives in the path segment, not a query param.
 public byCategory(category: string, limit = 30) {
   return this.client.get<ProductList>(`${this.resource}/category/${category}`, {
     params: { limit },
@@ -300,8 +307,9 @@ public byCategory(category: string, limit = 30) {
 ### Search
 
 ```typescript
-const res = await products.search('mascara');
+const res = await products.search('mascara'); // full-text search query
 expect(
+  // at least one result mentions the term somewhere in its fields
   res.body.products.some((p) =>
     JSON.stringify(p).toLowerCase().includes('mascara'),
   ),
@@ -311,16 +319,17 @@ expect(
 ### Sparse Field Selection (select)
 
 ```typescript
-const res = await products.selectFields(['title', 'price'], 3);
+const res = await products.selectFields(['title', 'price'], 3); // request only title + price
 const first = res.body.products[0] as unknown as Record<string, unknown>;
-expect(first).toHaveProperty('title');
-expect(first).toHaveProperty('price');
+expect(first).toHaveProperty('title'); // requested field present
+expect(first).toHaveProperty('price'); // requested field present
 expect(first).not.toHaveProperty('description'); // not requested -> absent
 ```
 
 Repository method:
 
 ```typescript
+// Sparse fieldset: join requested fields into a comma-separated select param.
 public selectFields(fields: readonly string[], limit = 5) {
   return this.client.get<ProductList>(this.resource, {
     params: { select: fields.join(','), limit },
@@ -331,15 +340,16 @@ public selectFields(fields: readonly string[], limit = 5) {
 ### Filter — page-based API (Open Brewery DB)
 
 ```typescript
-const res = await breweries.byState('ohio', 5);
+const res = await breweries.byState('ohio', 5); // state-filtered page (bare array)
 for (const b of res.body) {
-  expect(b.state_province.toLowerCase()).toBe('ohio');
+  expect(b.state_province.toLowerCase()).toBe('ohio'); // every record is in Ohio
 }
 ```
 
 Repository method:
 
 ```typescript
+// Filter by state and sort by name; combines filter + sort + pagination params.
 public byState(state: string, perPage = 10) {
   return this.client.get<Brewery[]>(this.resource, {
     params: { by_state: state, per_page: perPage, sort: 'name:asc' },

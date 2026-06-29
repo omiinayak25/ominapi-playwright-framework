@@ -25,9 +25,9 @@ Minimum commands:
 ```bash
 git clone https://github.com/omiinayak25/ominapi-playwright-framework.git
 cd ominapi-playwright-framework
-nvm use
-npm install
-cp .env.example .env
+nvm use            # activate the Node version pinned in .nvmrc (Node 22)
+npm install        # install dependencies and Playwright
+cp .env.example .env   # seed local config from the example file
 ```
 
 ---
@@ -85,7 +85,7 @@ npm run test:report
 ## Step 5 — Run the Full Suite
 
 ```bash
-npm test
+npm test   # run all phases (every tests/**/*.spec.ts) in parallel
 ```
 
 This runs all 213 tests across all 20 phases in parallel.
@@ -148,11 +148,12 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 2 · HTTP methods', () => {
+  // `echo` is an injected fixture bound to postman-echo.com.
   test('GET retrieves a resource', async ({ echo }) => {
-    const res = await echo.get<PostmanEcho>('/get');
+    const res = await echo.get<PostmanEcho>('/get'); // typed GET request
 
-    expect(res.status).toBe(HttpStatus.OK);
-    expect(res.body.url).toContain('/get');
+    expect(res.status).toBe(HttpStatus.OK); // 200 via named constant
+    expect(res.body.url).toContain('/get'); // echo reflects the request URL
   });
 });
 ```
@@ -197,10 +198,10 @@ import { HttpStatus } from '../../src/constants/http-status.js';
 test.describe('My new tests', () => {
   test('Echo reflects my custom header', async ({ echo }) => {
     const res = await echo.get('/get', {
-      headers: { 'X-My-Header': 'hello' },
+      headers: { 'X-My-Header': 'hello' }, // send a custom request header
     });
 
-    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.status).toBe(HttpStatus.OK); // request succeeded
     // postman-echo reflects request headers under res.body.headers
   });
 });

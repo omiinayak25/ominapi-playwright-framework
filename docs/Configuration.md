@@ -48,6 +48,7 @@ is created on the first call (lazy initialisation) and reused forever after.
 import { ConfigManager } from '@config/config.manager';
 
 // Access the validated config
+// getInstance() lazily builds (or reuses) the single validated instance
 const cfg = ConfigManager.getInstance().config;
 console.log(cfg.env); // 'dev' | 'staging' | 'prod'
 console.log(cfg.baseUrl); // validated, non-empty string
@@ -62,6 +63,7 @@ console.log(cfg.baseUrl); // validated, non-empty string
 import { config } from '@config/index';
 
 // config is the fully-validated AppConfig object
+// The barrel pre-resolves the singleton so consumers skip getInstance()
 const url = config.endpoints.dummyJson;
 ```
 
@@ -184,6 +186,7 @@ tests and services that need to branch on environment.
 Override at runtime:
 
 ```bash
+# Run the suite against the staging profile for this invocation only
 TEST_ENV=staging npm test
 ```
 
@@ -231,6 +234,7 @@ truly sensitive values.
 response bodies:
 
 ```bash
+# Raise Winston verbosity to log full request/response bodies
 LOG_LEVEL=debug npm test
 ```
 

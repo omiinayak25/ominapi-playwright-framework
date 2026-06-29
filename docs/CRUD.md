@@ -126,19 +126,21 @@ JSONPlaceholder is a simulated API: it validates and echoes responses but does n
 // tests/crud/posts.crud.spec.ts
 test('CREATE — returns 201 with a server-assigned id', async ({ posts }) => {
   const payload: NewPost = {
+    // NewPost omits id — the server assigns it
     userId: 1,
     title: 'OminAPI Phase 3',
     body: 'Repository pattern in action',
   };
-  const res = await posts.create(payload);
+  const res = await posts.create(payload); // POST /posts via the repository
   expect(res.status).toBe(HttpStatus.CREATED);
-  expect(res.body.id).toBe(101);
+  expect(res.body.id).toBe(101); // JSONPlaceholder always echoes id 101 on create
   expect(res.body.title).toBe(payload.title);
 });
 
 test('PATCH — partially updates only the provided fields', async ({
   posts,
 }) => {
+  // Send only the title; other fields are left untouched
   const res = await posts.patch(1, { title: 'Only the title changed' });
   expect(res.status).toBe(HttpStatus.OK);
   expect(res.body.title).toBe('Only the title changed');
@@ -178,19 +180,19 @@ DummyJSON exposes real-world quirks that the repository absorbs:
 test('READ ALL — returns a paging envelope honoring the limit', async ({
   products,
 }) => {
-  const res = await products.getAll(5, 0);
+  const res = await products.getAll(5, 0); // limit=5, skip=0
   expect(res.status).toBe(HttpStatus.OK);
-  expect(res.body.products.length).toBe(5);
-  expect(res.body.total).toBeGreaterThan(5);
+  expect(res.body.products.length).toBe(5); // items live under the paging envelope
+  expect(res.body.total).toBeGreaterThan(5); // total reflects the full dataset
   expect(res.body.limit).toBe(5);
 });
 
 test('DELETE — returns the product with soft-delete metadata', async ({
   products,
 }) => {
-  const res = await products.remove(1);
+  const res = await products.remove(1); // DummyJSON soft-deletes rather than removing
   expect(res.status).toBe(HttpStatus.OK);
-  expect(res.body.isDeleted).toBe(true);
+  expect(res.body.isDeleted).toBe(true); // soft-delete flag set on the returned product
   expect(res.body.deletedOn).toBeTruthy();
 });
 ```
@@ -223,10 +225,11 @@ The service makes the auth requirement structurally explicit: `update`, `partial
 ```typescript
 // tests/crud/posts.crud.spec.ts (BookingService used in chaining)
 // tests/chaining/booking-lifecycle.spec.ts
-const res = await bookings.create(original);
+const res = await bookings.create(original); // create requires no auth
 expect(res.status).toBe(HttpStatus.OK);
-const bookingId = res.body.bookingid;
+const bookingId = res.body.bookingid; // extract id for the follow-up delete
 
+// remove() demands an AuthStrategy — credentials are structurally required
 const del = await bookings.remove(bookingId, new CookieTokenStrategy(token));
 expect(del.status).toBe(HttpStatus.CREATED); // Booker quirk: 201 on delete
 ```
@@ -244,29 +247,29 @@ test('login -> create -> read -> update -> patch -> delete -> verify', async ({
   auth,
   bookings,
 }) => {
-  const ctx: ChainContext = {};
+  const ctx: ChainContext = {}; // typed bag that threads values across steps
 
   await test.step('1) login and extract token', async () => {
     ctx.token = await auth.loginBooker(
       config.credentials.username,
       config.credentials.password,
-    );
+    ); // stash the auth token for later mutating steps
   });
 
   await test.step('2) create booking and extract id', async () => {
     const res = await bookings.create(
       BookingFactory.forGuest('Chain', 'Tester'),
     );
-    ctx.bookingId = res.body.bookingid;
+    ctx.bookingId = res.body.bookingid; // carry the new id forward
   });
 
   await test.step('4) full update (PUT) with auth', async () => {
     const res = await bookings.update(
-      ctx.bookingId!,
+      ctx.bookingId!, // id from step 2
       BookingFactory.forGuest('Updated', 'Guest'),
-      new CookieTokenStrategy(ctx.token!),
+      new CookieTokenStrategy(ctx.token!), // token from step 1
     );
-    expect(res.body.firstname).toBe('Updated');
+    expect(res.body.firstname).toBe('Updated'); // PUT replaced the record
   });
 
   await test.step('6) delete with auth', async () => {
@@ -274,12 +277,12 @@ test('login -> create -> read -> update -> patch -> delete -> verify', async ({
       ctx.bookingId!,
       new CookieTokenStrategy(ctx.token!),
     );
-    expect(res.status).toBe(HttpStatus.CREATED);
+    expect(res.status).toBe(HttpStatus.CREATED); // Booker returns 201 on delete
   });
 
   await test.step('7) verify deletion (now 404)', async () => {
-    const res = await bookings.getById(ctx.bookingId!);
-    expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    const res = await bookings.getById(ctx.bookingId!); // re-read the deleted id
+    expect(res.status).toBe(HttpStatus.NOT_FOUND); // confirms it is gone
   });
 });
 ```

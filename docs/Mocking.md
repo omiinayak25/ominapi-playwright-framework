@@ -151,17 +151,19 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 
 test('forces a 201 Created with custom headers', async ({ mock }) => {
   const { server, client } = mock;
+  // Register a canned response for POST /items
   server.stub('POST', '/items', {
     status: 201,
     body: { id: 99, created: true },
     headers: { location: '/items/99', 'x-request-id': 'mock-123' },
   });
 
+  // Real HTTP call hits the in-process mock server
   const res = await client.post<{ id: number }>('/items', {
     data: { name: 'widget' },
   });
 
-  expect(res.status).toBe(201);
+  expect(res.status).toBe(201); // assert the forced status and headers
   expect(res.body.id).toBe(99);
   expect(res.headers['location']).toBe('/items/99');
   expect(res.headers['x-request-id']).toBe('mock-123');
@@ -169,6 +171,7 @@ test('forces a 201 Created with custom headers', async ({ mock }) => {
 
 test('forces a 500 error to test failure handling', async ({ mock }) => {
   const { server, client } = mock;
+  // Stub a deterministic server error to exercise client error handling
   server.stub('GET', '/flaky', {
     status: 500,
     body: { error: 'simulated outage' },
@@ -186,6 +189,7 @@ test('forces a 500 error to test failure handling', async ({ mock }) => {
 // tests/mocking/route-mocking.spec.ts
 test('a stubbed route returns the canned response', async ({ mock }) => {
   const { server, client } = mock;
+  // Stub GET /users with a fixed array body (status defaults to 200)
   server.stub('GET', '/users', {
     body: [
       { id: 1, name: 'Ada' },
@@ -200,6 +204,7 @@ test('a stubbed route returns the canned response', async ({ mock }) => {
 });
 
 test('an unregistered route returns 404', async ({ mock }) => {
+  // No stub registered → mock server replies 404 with a JSON error
   const res = await mock.client.get('/not-mocked');
   expect(res.status).toBe(404);
 });
@@ -211,6 +216,7 @@ test('an unregistered route returns 404', async ({ mock }) => {
 // tests/mocking/dynamic-mocking.spec.ts
 test('response is computed from query parameters', async ({ mock }) => {
   const { server, client } = mock;
+  // Dynamic handler builds the body from the incoming query string
   server.on('GET', '/greet', (req) => ({
     body: { message: `Hello, ${req.query.name ?? 'stranger'}!` },
   }));
@@ -223,6 +229,7 @@ test('response is computed from query parameters', async ({ mock }) => {
 
 test('handler echoes the posted body', async ({ mock }) => {
   const { server, client } = mock;
+  // Reflect the parsed request body straight back to the caller
   server.on('POST', '/echo', (req) => ({ body: { received: req.body } }));
 
   const payload = { a: 1, nested: { b: 2 } };
@@ -236,12 +243,14 @@ test('handler returns a conditional status based on input', async ({
   mock,
 }) => {
   const { server, client } = mock;
+  // Branch the status code on the request's query value
   server.on('GET', '/resource', (req) =>
     req.query.id === '1'
       ? { status: 200, body: { id: 1 } }
       : { status: 404, body: { error: 'not found' } },
   );
 
+  // Same route, two inputs → two different outcomes
   const found = await client.get('/resource', { params: { id: 1 } });
   const missing = await client.get('/resource', { params: { id: 999 } });
 
@@ -262,14 +271,15 @@ test('captures method, path, headers and body the client sent', async ({
   const { server, client } = mock;
   server.stub('POST', '/track', { status: 202, body: { ok: true } });
 
+  // Send a request carrying auth + a custom header for the spy to capture
   await client.post('/track', {
     data: { event: 'signup', userId: 42 },
     headers: { 'x-correlation-id': 'trace-abc' },
     auth: new ApiKeyStrategy('x-api-key', 'secret-key'),
   });
 
-  expect(server.requests).toHaveLength(1);
-  const captured = server.requests[0];
+  expect(server.requests).toHaveLength(1); // exactly one request recorded
+  const captured = server.requests[0]; // inspect what the client actually sent
   expect(captured?.method).toBe('POST');
   expect(captured?.path).toBe('/track');
   expect(captured?.body).toEqual({ event: 'signup', userId: 42 });
@@ -286,6 +296,7 @@ test('records multiple requests in order', async ({ mock }) => {
   await client.get('/a');
   await client.get('/b');
 
+  // Spy preserves arrival order of the two calls
   expect(server.requests.map((r) => r.path)).toEqual(['/a', '/b']);
 });
 ```
@@ -367,14 +378,17 @@ The `mock` fixture (defined in `src/fixtures/api.fixtures.ts`) creates a
 // src/fixtures/api.fixtures.ts
 mock: async ({}, use) => {
   const server = new MockServer();
-  await server.start();
+  await server.start(); // bind to an ephemeral port for this test
+  // Point a Playwright request context at the mock server's URL
   const context = await playwrightRequest.newContext({
     baseURL: server.url,
     extraHTTPHeaders: { Accept: 'application/json' },
   });
   try {
+    // Hand the test a server (to stub/spy) and a client bound to it
     await use({ server, client: new ApiClient(context, 'mock') });
   } finally {
+    // Always release resources, even if the test throws
     await context.dispose();
     await server.stop();
   }

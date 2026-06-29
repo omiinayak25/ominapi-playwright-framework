@@ -29,7 +29,9 @@ tests target HTTP/GraphQL/WebSocket APIs.
 ## Step 1 — Clone the Repository
 
 ```bash
+# Clone the framework repository over HTTPS
 git clone https://github.com/omiinayak25/ominapi-playwright-framework.git
+# Move into the project root before running any further commands
 cd ominapi-playwright-framework
 ```
 
@@ -40,6 +42,7 @@ cd ominapi-playwright-framework
 The project pins **Node 22** in `.nvmrc`. With nvm installed:
 
 ```bash
+# Switch to the Node version pinned in .nvmrc (Node 22)
 nvm use
 ```
 
@@ -51,6 +54,7 @@ If Node 22 is not yet installed: `nvm install 22 && nvm use`.
 ## Step 3 — Install Dependencies
 
 ```bash
+# Install runtime + dev dependencies and run the `prepare` (Husky) hook
 npm install
 ```
 
@@ -65,6 +69,7 @@ All configuration is supplied via environment variables. A fully annotated
 template is provided:
 
 ```bash
+# Create your local, git-ignored .env from the annotated template
 cp .env.example .env
 ```
 
@@ -89,18 +94,21 @@ reference):
 Run the full 213-test suite:
 
 ```bash
+# Run the entire 213-test suite
 npm test
 ```
 
 Run a single phase (faster for initial verification):
 
 ```bash
+# Run only the foundation phase — quicker than the full suite
 npm run test:foundation
 ```
 
 Run only the CRUD phase:
 
 ```bash
+# Run only the CRUD phase
 npm run test:crud
 ```
 
@@ -111,6 +119,7 @@ npm run test:crud
 ### Playwright HTML report
 
 ```bash
+# Open the built-in Playwright HTML report from playwright-report/
 npm run test:report
 ```
 
@@ -119,8 +128,8 @@ Opens the built-in Playwright HTML report from `playwright-report/`.
 ### Allure report (requires Java)
 
 ```bash
-npm run allure:report   # generate from allure-results/ → allure-report/
-npm run allure:open     # open in the browser
+npm run allure:report   # generate from allure-results/ → allure-report/ (needs Java)
+npm run allure:open     # open the generated report in the browser
 ```
 
 ---
@@ -130,6 +139,7 @@ npm run allure:open     # open in the browser
 Before pushing or creating a PR, run the full gate:
 
 ```bash
+# Full quality gate: typecheck → lint → format:check → npm test
 npm run verify
 ```
 
@@ -154,6 +164,7 @@ docker run --rm ominapi
 To inject environment variables at runtime:
 
 ```bash
+# Override config via -e flags; values reach ConfigManager at runtime
 docker run --rm \
   -e BASE_URL=https://my-staging-api.example.com \
   -e TEST_ENV=staging \
@@ -192,6 +203,7 @@ Set environment variables as repository secrets (GitHub) or pipeline variables
 GitHub Actions:
 
 ```yaml
+# Map repository secrets into env vars — never commit real values
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
   BOOKER_USERNAME: ${{ secrets.BOOKER_USERNAME }}
@@ -203,6 +215,7 @@ env:
 ## Cleaning Build Artefacts
 
 ```bash
+# Delete generated output: playwright-report/, test-results/, allure-results/, dist/
 npm run clean
 ```
 

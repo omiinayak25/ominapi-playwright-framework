@@ -125,7 +125,7 @@ import {
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test('status, ok, and JSON content-type', async ({ products }) => {
-  const res = await products.getById(1);
+  const res = await products.getById(1); // single request, asserted on several axes
 
   expectStatus(res, HttpStatus.OK); // exact 200
   expectOk(res); // 2xx guard
@@ -157,8 +157,8 @@ test('a single-product body is reasonably small (< 50KB)', async ({
 test('collection body is an array of the expected length', async ({
   posts,
 }) => {
-  const res = await posts.getAll();
-  expectArrayBody(res, 1); // at least 1 element
+  const res = await posts.getAll(); // collection endpoint
+  expectArrayBody(res, 1); // assert array shape + at least 1 element
   expect(res.body.length).toBe(100); // exact count
 });
 ```
@@ -169,11 +169,11 @@ test('collection body is an array of the expected length', async ({
 test('nested object and array fields are reachable and typed', async ({
   products,
 }) => {
-  const res = await products.getAll(3, 0);
+  const res = await products.getAll(3, 0); // limit 3, skip 0
 
-  expect(res.body.products).toHaveLength(3);
+  expect(res.body.products).toHaveLength(3); // paginated envelope holds 3 items
   const first = res.body.products[0];
-  expect(typeof first?.title).toBe('string');
+  expect(typeof first?.title).toBe('string'); // nested field is reachable and typed
 
   // Dynamic rule applied across every element
   for (const p of res.body.products) {
@@ -193,7 +193,7 @@ import { postSchema } from '../../src/schemas/index.js';
 
 test('post body matches declared schema', async ({ posts }) => {
   const res = await posts.getById(1);
-  expectMatchesSchema(res, postSchema);
+  expectMatchesSchema(res, postSchema); // delegates to the AJV SchemaValidator singleton
   // On failure: "Body failed schema validation:\n  - /body must be string"
 });
 ```

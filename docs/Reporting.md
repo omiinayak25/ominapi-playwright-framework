@@ -26,11 +26,11 @@ All reporters are registered in [`../playwright.config.ts`](../playwright.config
 
 ```ts
 reporter: [
-  ['list'],
-  ['html', { open: 'never', outputFolder: 'playwright-report' }],
-  ['junit', { outputFile: 'test-results/junit-results.xml' }],
-  ['allure-playwright', { resultsDir: 'allure-results' }],
-  ['./src/reporters/summary.reporter.ts'],
+  ['list'], // live per-test status to stdout
+  ['html', { open: 'never', outputFolder: 'playwright-report' }], // interactive HTML report (no auto-open)
+  ['junit', { outputFile: 'test-results/junit-results.xml' }], // JUnit XML for CI dashboards
+  ['allure-playwright', { resultsDir: 'allure-results' }], // raw Allure result data
+  ['./src/reporters/summary.reporter.ts'], // custom summary.json + console block
 ],
 ```
 
@@ -185,14 +185,15 @@ Printed to `process.stdout` at the end of every run:
 
 ```ts
 export default class SummaryReporter implements Reporter {
-  private readonly records: TestRecord[] = [];
-  private startTime = 0;
+  private readonly records: TestRecord[] = []; // one entry per finished test
+  private startTime = 0; // wall-clock start, set in onBegin
 
   public onBegin(_config: unknown, _suite: Suite): void {
-    this.startTime = Date.now();
+    this.startTime = Date.now(); // capture run start for total-duration calc
   }
 
   public onTestEnd(test: TestCase, result: TestResult): void {
+    // record each test's full title path, status, and duration as it finishes
     this.records.push({
       title: test.titlePath().filter(Boolean).join(' › '),
       status: result.status,
@@ -232,7 +233,7 @@ This surfaces raw request/response payloads in the terminal. Do not set `LOG_LEV
 
 ```ts
 use: {
-  trace: 'on-first-retry',
+  trace: 'on-first-retry', // capture a trace only when a failed test is retried
 },
 ```
 

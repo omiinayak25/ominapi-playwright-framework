@@ -87,6 +87,7 @@ Loads a spec from `src/contracts/` (resolved from `process.cwd()`). Throws if
 the file is missing or not valid JSON.
 
 ```typescript
+// Load and parse the committed spec from src/contracts/
 const contract = OpenApiContract.fromFile('product-api.openapi.json');
 ```
 
@@ -96,6 +97,7 @@ Returns `spec.info.version` — use this to assert the spec's declared version i
 tests, or to gate CI on expected version strings.
 
 ```typescript
+// Assert the spec's declared info.version
 expect(contract.version).toBe('1.0.0');
 ```
 
@@ -107,6 +109,7 @@ Throws fast (fail-fast principle) if the path, method, status code, or
 `application/json` media type is not present in the spec.
 
 ```typescript
+// Pull the 200 response schema for GET /products/{id}
 const productSchema = contract.getResponseSchema(
   '/products/{id}',
   'get',
@@ -220,6 +223,7 @@ empty array.
 import { OpenApiContract } from '../../src/utils/openapi.js';
 import { SchemaValidator } from '../../src/validators/index.js';
 
+// Extract the schema once at module scope so AJV caches the compiled validator
 const contract = OpenApiContract.fromFile('product-api.openapi.json');
 const productSchema = contract.getResponseSchema(
   '/products/{id}',
@@ -231,8 +235,9 @@ const validator = SchemaValidator.getInstance();
 test('the live provider response satisfies the contract', async ({
   products,
 }) => {
-  const res = await products.getById(1);
+  const res = await products.getById(1); // hit the real DummyJSON provider
   const result = validator.validate(productSchema, res.body);
+  // On failure, surface the AJV errors in the assertion message
   expect(result.valid, result.errors.join('; ')).toBe(true);
 });
 ```
@@ -248,7 +253,8 @@ test('a drifting provider response VIOLATES the contract', async ({ mock }) => {
   const res = await mock.client.get('/products/1');
 
   const result = validator.validate(productSchema, res.body);
-  expect(result.valid).toBe(false);
+  expect(result.valid).toBe(false); // contract violation is detected
+  // Confirm the failure points at the id type or a missing required field
   expect(result.errors.join(' ')).toMatch(/id|required/);
 });
 ```
@@ -257,6 +263,7 @@ test('a drifting provider response VIOLATES the contract', async ({ mock }) => {
 
 ```typescript
 test('extracting a schema for an undefined operation fails fast', () => {
+  // Unknown path → getResponseSchema throws instead of returning undefined
   expect(() => contract.getResponseSchema('/nope', 'get')).toThrow(
     /No JSON schema/,
   );
@@ -272,6 +279,7 @@ import {
   isBackwardCompatible,
 } from '../../src/utils/contract-diff.js';
 
+// Baseline schema that each test evolves into a v2 variant
 const v1: SchemaObject = {
   type: 'object',
   required: ['id', 'name'],
@@ -283,15 +291,17 @@ const v1: SchemaObject = {
 };
 
 test('adding a new optional field is backward COMPATIBLE', () => {
+  // v2 only adds a field — existing consumers are unaffected
   const v2 = {
     ...v1,
     properties: { ...v1.properties, discount: { type: 'number' } },
   };
   expect(isBackwardCompatible(v1, v2)).toBe(true);
-  expect(detectBreakingChanges(v1, v2)).toHaveLength(0);
+  expect(detectBreakingChanges(v1, v2)).toHaveLength(0); // zero breaking changes
 });
 
 test('removing a field is BREAKING', () => {
+  // v2 drops the `price` property entirely
   const v2 = {
     type: 'object',
     required: ['id', 'name'],
@@ -299,6 +309,7 @@ test('removing a field is BREAKING', () => {
   };
   const changes = detectBreakingChanges(v1, v2);
   expect(isBackwardCompatible(v1, v2)).toBe(false);
+  // The removal is reported as a 'removed-field' change on `price`
   expect(
     changes.some((c) => c.kind === 'removed-field' && c.field === 'price'),
   ).toBe(true);
@@ -310,6 +321,7 @@ test('changing a field type is BREAKING', () => {
     properties: { ...v1.properties, id: { type: 'string' } },
   }; // integer → string
   const changes = detectBreakingChanges(v1, v2);
+  // The type change is reported as a 'type-changed' change on `id`
   expect(
     changes.some((c) => c.kind === 'type-changed' && c.field === 'id'),
   ).toBe(true);
@@ -318,6 +330,7 @@ test('changing a field type is BREAKING', () => {
 test('dropping a field from required is BREAKING', () => {
   const v2 = { ...v1, required: ['id'] }; // name no longer required
   const changes = detectBreakingChanges(v1, v2);
+  // Reported as 'required-removed' since consumers no longer get a guarantee
   expect(
     changes.some((c) => c.kind === 'required-removed' && c.field === 'name'),
   ).toBe(true);
@@ -329,6 +342,7 @@ test('dropping a field from required is BREAKING', () => {
 ```typescript
 // tests/contract/version-validation.spec.ts
 test('the contract declares its version', () => {
+  // Guards against an accidental version bump in the spec file
   expect(contract.version).toBe('1.0.0');
 });
 
@@ -347,6 +361,7 @@ test('a v2 provider that ADDS a field stays compatible with v1 contract', async 
     }, // NEW in v2
   });
   const res = await mock.client.get('/products/1');
+  // Extra field is tolerated (additionalProperties: true) — still valid
   expect(validator.validate(productSchema, res.body).valid).toBe(true);
 });
 
@@ -364,7 +379,7 @@ test('a v2 provider that DROPS a required field breaks the contract', async ({
   });
   const res = await mock.client.get('/products/1');
   const result = validator.validate(productSchema, res.body);
-  expect(result.valid).toBe(false);
+  expect(result.valid).toBe(false); // missing required field breaks the contract
   expect(result.errors.join(' ')).toMatch(/price|required/);
 });
 ```

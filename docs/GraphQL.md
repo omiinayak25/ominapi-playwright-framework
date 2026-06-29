@@ -112,6 +112,7 @@ interface Country {
 }
 
 test('fetches a single country with selected fields', async ({ countries }) => {
+  // Send a read operation; the generic types the returned data shape
   const res = await countries.query<{ country: Country }>(`
     {
       country(code: "US") {
@@ -123,10 +124,10 @@ test('fetches a single country with selected fields', async ({ countries }) => {
     }
   `);
 
-  expect(res.status).toBe(200);
-  expect(res.body.errors).toBeUndefined();
+  expect(res.status).toBe(200); // transport reached the server
+  expect(res.body.errors).toBeUndefined(); // no GraphQL-level errors
 
-  const data = graphqlData(res); // throws if errors / null
+  const data = graphqlData(res); // unwrap data; throws if errors / null
   expect(data.country.name).toBe('United States');
   expect(data.country.capital).toBe('Washington D.C.');
 });
@@ -136,6 +137,7 @@ test('fetches a single country with selected fields', async ({ countries }) => {
 
 ```ts
 // tests/graphql/queries.spec.ts
+// Pass a server-side filter argument to narrow results to one continent
 const res = await countries.query<{ countries: { code: string }[] }>(`
   {
     countries(filter: { continent: { eq: "EU" } }) {
@@ -145,19 +147,21 @@ const res = await countries.query<{ countries: { code: string }[] }>(`
   }
 `);
 const data = graphqlData(res);
-expect(data.countries.length).toBeGreaterThan(0);
+expect(data.countries.length).toBeGreaterThan(0); // EU has multiple countries
 ```
 
 ### Variables — same query, different inputs
 
 ```ts
 // tests/graphql/variables-fragments.spec.ts
+// One parameterized query reused with different runtime variables
 const query = `
   query GetCountry($code: ID!) {
     country(code: $code) { name capital currency }
   }
 `;
 
+// Same query string, different variables map per call
 const us = graphqlData(
   await countries.query<{ country: Country }>(query, { code: 'US' }),
 );
@@ -173,6 +177,7 @@ expect(jp.country.capital).toBe('Tokyo');
 
 ```ts
 // tests/graphql/variables-fragments.spec.ts
+// Define a reusable field set once, then spread it into multiple aliased selections
 const query = `
   fragment CountryFields on Country {
     name
@@ -201,6 +206,7 @@ interface CreatedPost {
   createPost: { id: string; title: string; body: string };
 }
 
+// Mutation declaring a typed input variable and selecting the created fields back
 const mutation = `
   mutation CreatePost($input: CreatePostInput!) {
     createPost(input: $input) {
@@ -211,6 +217,7 @@ const mutation = `
   }
 `;
 
+// mutate() sends the same POST as query(), passing the input object as a variable
 const res = await graphqlZero.mutate<CreatedPost>(mutation, {
   input: { title: 'OminAPI Phase 14', body: 'GraphQL mutation test' },
 });
@@ -308,11 +315,13 @@ The `countries` and `graphqlZero` fixtures are defined in
 `../src/fixtures/api.fixtures.ts` and injected automatically:
 
 ```ts
+// Countries API: GraphQL endpoint lives at the root path '/'
 countries: async ({}, use) => {
   await withClient(config.endpoints.countriesGraphql, 'countries-gql', (c) =>
     use(new GraphQLClient(c, '/')),
   );
 },
+// GraphQLZero API: GraphQL endpoint lives at '/api'
 graphqlZero: async ({}, use) => {
   await withClient(config.endpoints.graphqlZero, 'graphqlzero', (c) =>
     use(new GraphQLClient(c, '/api')),

@@ -46,10 +46,11 @@ Defined in [`../src/utils/perf.ts`](../src/utils/perf.ts).
 Times a single async call. Returns `{ result: T; durationMs: number }`.
 
 ```ts
+// Time a single request; measure returns the result plus elapsed ms
 const { result, durationMs } = await PerfHelper.measure(() =>
   products.getById(1),
 );
-expect(durationMs).toBeLessThan(4000);
+expect(durationMs).toBeLessThan(4000); // assert the per-request SLA
 ```
 
 ### `PerfHelper.runBatch<T>(task, count)`
@@ -67,6 +68,7 @@ interface BatchResult<T> {
 The `totalMs` is captured before any `Promise.all` settlement, making it the true wall-clock window—the basis for the concurrency proof.
 
 ```ts
+// Fire 12 identical requests concurrently and collect timing data
 const batch = await PerfHelper.runBatch(() => products.getById(1), 12);
 // batch.totalMs < sum(batch.durations)  →  requests truly ran in parallel
 ```
@@ -91,6 +93,7 @@ interface LatencyStats {
 Percentiles use the **nearest-rank method**: `rank = ceil(p/100 * n)`.
 
 ```ts
+// Reduce the raw durations into summary percentiles
 const stats = PerfHelper.stats(batch.durations);
 expect(stats.p95).toBeLessThan(6000); // tail SLA
 ```
@@ -159,11 +162,13 @@ test('concurrency is genuinely parallel (wall-clock << sum of durations)', async
   products,
 }) => {
   const CONCURRENCY = 10;
+  // Run 10 requests at once so parallelism can be observed
   const batch = await PerfHelper.runBatch(
     () => products.getById(1),
     CONCURRENCY,
   );
 
+  // Sum of individual durations = time if requests had run serially
   const sumDurations = batch.durations.reduce((a, b) => a + b, 0);
   // If requests ran in parallel, total wall-clock is much less than the sum.
   expect(batch.totalMs).toBeLessThan(sumDurations);
@@ -197,8 +202,8 @@ These thresholds are generous for public demo APIs; tighten them for production 
 - Throughput (req/s) is logged for historical comparison
 
 ```ts
-const ROUNDS = 3;
-const PER_ROUND = 5;
+const ROUNDS = 3; // number of sequential bursts
+const PER_ROUND = 5; // concurrent requests per burst
 // Total: 15 requests in sustained bursts
 ```
 
@@ -213,6 +218,7 @@ This is intentionally small-scale. It catches crash-on-load regressions without 
 Fetches the full DummyJSON product catalog with `limit=0` (returns all items):
 
 ```ts
+// limit=0 asks the API for the entire catalog in one response
 const { result, durationMs } = await PerfHelper.measure(() =>
   products.getAll(0, 0),
 );
@@ -228,12 +234,14 @@ expect(durationMs).toBeLessThan(15_000);
 Posts a 1000-element JSON array to httpbin `/post` and asserts the server echoed all 1000 items:
 
 ```ts
+// Build a 1000-element payload to exercise large request bodies
 const bigArray = Array.from({ length: 1000 }, (_, i) => ({
   id: i,
   name: `item-${i}`,
   value: i * 7,
 }));
 const res = await echo.post('/post', { data: { items: bigArray } });
+// httpbin echoes the body back; confirm nothing was truncated
 expect((res.body.json as { items: unknown[] }).items).toHaveLength(1000);
 ```
 
@@ -246,24 +254,27 @@ expect((res.body.json as { items: unknown[] }).items).toHaveLength(1000);
 ```ts
 import { PerfHelper } from '../../src/utils/perf.js';
 
+// Wrap any service call in measure to get both result and timing
 const { result, durationMs } = await PerfHelper.measure(() =>
   myService.getResource(42),
 );
 expect(result.status).toBe(200);
-expect(durationMs).toBeLessThan(2000);
+expect(durationMs).toBeLessThan(2000); // lightweight inline latency check
 ```
 
 ### Run a concurrent batch and check tail latency
 
 ```ts
+// Run 20 concurrent calls and gather their results + durations
 const batch = await PerfHelper.runBatch(() => myService.getResource(1), 20);
 
+// Every request in the batch must have succeeded
 for (const res of batch.results) {
   expect(res.status).toBe(200);
 }
 
 const stats = PerfHelper.stats(batch.durations);
-expect(stats.p95).toBeLessThan(3000);
+expect(stats.p95).toBeLessThan(3000); // assert tail latency, not average
 ```
 
 ### Log stats for CI artifacts
@@ -271,7 +282,7 @@ expect(stats.p95).toBeLessThan(3000);
 ```ts
 import { logger } from '../../src/utils/logger.js';
 
-const stats = PerfHelper.stats(batch.durations);
+const stats = PerfHelper.stats(batch.durations); // compute percentiles to log
 logger.info('Perf stats', { ...stats }); // captured in CI log; queryable in Allure
 ```
 

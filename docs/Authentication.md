@@ -73,6 +73,7 @@ Encodes `username:password` as Base64 using Node's `Buffer`. The encoding happen
 
 ```typescript
 public apply(): AuthHeaders {
+  // Base64-encode "username:password" per RFC 7617
   const encoded = Buffer.from(`${this.username}:${this.password}`).toString('base64');
   return { Authorization: `Basic ${encoded}` };
 }
@@ -82,6 +83,7 @@ public apply(): AuthHeaders {
 
 ```typescript
 // tests/authentication/basic-auth.spec.ts
+// Attach Basic credentials for this single request via the auth option
 const res = await echo.get<EchoBasicAuth>('/basic-auth', {
   auth: new BasicAuthStrategy('postman', 'password'),
 });
@@ -99,6 +101,7 @@ Wraps any string token as `Authorization: Bearer <token>`. A JWT is just a strin
 
 ```typescript
 public apply(): AuthHeaders {
+  // Present the token (opaque or JWT) as a Bearer credential per RFC 6750
   return { Authorization: `Bearer ${this.token}` };
 }
 ```
@@ -107,6 +110,7 @@ public apply(): AuthHeaders {
 
 ```typescript
 // tests/authentication/bearer-jwt.spec.ts
+// Send a Bearer token; httpbin echoes it back when accepted
 const res = await httpbin.get<BearerResponse>('/bearer', {
   auth: new BearerTokenStrategy('opaque-token-abc123'),
 });
@@ -124,6 +128,7 @@ The header name is a constructor parameter so one class handles every vendor con
 
 ```typescript
 public apply(): AuthHeaders {
+  // Place the key under the vendor-specific header name supplied at construction
   return { [this.headerName]: this.key };
 }
 ```
@@ -132,6 +137,7 @@ public apply(): AuthHeaders {
 
 ```typescript
 // tests/authentication/api-key.spec.ts
+// Send the key under the "x-api-key" header
 const res = await echo.get<PostmanEcho>('/get', {
   auth: new ApiKeyStrategy('x-api-key', 'omni-secret-key-123'),
 });
@@ -153,6 +159,7 @@ Sends the token in the `Cookie` header rather than `Authorization`. Restful Book
 
 ```typescript
 public apply(): AuthHeaders {
+  // Transport the token via the Cookie header instead of Authorization
   return { Cookie: `${this.cookieName}=${this.token}` };
 }
 ```
@@ -161,6 +168,7 @@ public apply(): AuthHeaders {
 
 ```typescript
 // tests/authentication/token-session.spec.ts
+// Acquire a session token from POST /auth, then thread it through the cookie
 const token = await auth.loginBooker(
   config.credentials.username,
   config.credentials.password,
@@ -168,6 +176,7 @@ const token = await auth.loginBooker(
 const authorized = await booker.del(`/booking/${id}`, {
   auth: new CookieTokenStrategy(token),
 });
+// Booker returns 201 (not 204) on a successful authorized DELETE
 expect(authorized.status).toBe(HttpStatus.CREATED);
 ```
 
@@ -181,6 +190,7 @@ Returns an empty header map. Keeps `ApiClient` free of `if (auth)` guards. Makes
 
 ```typescript
 public apply(): AuthHeaders {
+  // Null Object: contribute no auth headers
   return {};
 }
 ```
@@ -189,6 +199,7 @@ public apply(): AuthHeaders {
 
 ```typescript
 // tests/authentication/basic-auth.spec.ts
+// No credentials sent → endpoint rejects with 401
 const res = await echo.get('/basic-auth', { auth: new NoAuthStrategy() });
 expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
 ```
@@ -203,10 +214,12 @@ Strategies format a token into headers, but something must first _acquire_ that 
 
 ```typescript
 public async loginBooker(username: string, password: string): Promise<string> {
+  // Exchange credentials for a session token via the Booker auth endpoint
   const res = await this.client.post<AuthTokenResponse>('/auth', {
     data: { username, password },
   });
   const token = res.body?.token;
+  // Fail fast: a non-200 or missing token aborts setup loudly
   if (res.status !== 200 || !token) {
     throw new Error(`[AuthService] Booker login failed (status ${res.status}). Body: ${res.rawText}`);
   }
@@ -219,6 +232,7 @@ public async loginBooker(username: string, password: string): Promise<string> {
 ```typescript
 // src/fixtures/api.fixtures.ts
 auth: async ({}, use) => {
+  // Provision a Booker-scoped client, expose an AuthService, dispose on teardown
   await withClient(config.endpoints.booker, 'booker-auth', (c) =>
     use(new AuthService(c)),
   );
@@ -241,6 +255,7 @@ Per-request auth always overrides the client default.
 const client = new ApiClient(context, 'my-api', new BearerTokenStrategy(token));
 
 // Per-request override (this one call uses Basic instead):
+// The per-request auth option takes precedence over the client default
 const res = await client.get('/protected', {
   auth: new BasicAuthStrategy('admin', 'secret'),
 });
@@ -303,6 +318,7 @@ expect(res2.status).toBe(HttpStatus.UNAUTHORIZED);
 
 // No token on a Booker DELETE -> 403 (auth enforced)
 const res3 = await booker.del(`/booking/${id}`, { auth: new NoAuthStrategy() });
+// Client returns the status rather than throwing, so this assertion works
 expect(res3.status).toBe(HttpStatus.FORBIDDEN);
 ```
 
