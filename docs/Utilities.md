@@ -2,12 +2,12 @@
 
 ## Overview
 
-OmniAPI ships 17 utility modules in `src/utils/`. Each is a focused, tested
+OminAPI ships 17 utility modules in `src/utils/`. Each is a focused, tested
 module with a single responsibility. They are the foundation that API clients,
 services, builders, and validators build on — but they have no knowledge of
 Playwright or test structure, so they are also independently reusable.
 
-Repository: <https://github.com/omiinayak25/omniapi-playwright-framework>
+Repository: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 

@@ -18,8 +18,11 @@ interface Country {
   currency: string | null;
 }
 
+// Suite: demonstrates GraphQL variables and fragments for reuse/parameterization.
 test.describe('Phase 14 · Variables & fragments', () => {
   test.describe.configure({ retries: 2 }); // external GraphQL endpoint can blip
+  // Scenario: run one parameterized query twice with different variable values.
+  // Expected: each call returns the country matching its $code input.
   test('VARIABLES: same query, different inputs', async ({ countries }) => {
     const query = `
       query GetCountry($code: ID!) {
@@ -39,6 +42,8 @@ test.describe('Phase 14 · Variables & fragments', () => {
     expect(jp.country.capital).toBe('Tokyo');
   });
 
+  // Scenario: define a fragment once and apply it to two aliased selections.
+  // Expected: both selections return the same fragment-defined fields.
   test('FRAGMENTS: a reusable field set applied to multiple countries', async ({
     countries,
   }) => {

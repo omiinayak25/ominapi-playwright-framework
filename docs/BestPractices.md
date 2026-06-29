@@ -1,6 +1,6 @@
 # Best Practices
 
-Practices actually embodied in the OmniAPI framework — each with the **why** and
+Practices actually embodied in the OminAPI framework — each with the **why** and
 the **where** so you can find the implementation.
 
 ---

@@ -21,7 +21,9 @@ const productSchema = contract.getResponseSchema(
 );
 const validator = SchemaValidator.getInstance();
 
+// Suite: validate real responses against schemas pulled from the OpenAPI spec.
 test.describe('Phase 17 · OpenAPI contract validation', () => {
+  // Happy path: a compliant live provider response validates clean.
   test('the live provider response satisfies the contract', async ({
     products,
   }) => {
@@ -30,6 +32,7 @@ test.describe('Phase 17 · OpenAPI contract validation', () => {
     expect(result.valid, result.errors.join('; ')).toBe(true);
   });
 
+  // Drift detection: a mocked response with a wrong type / missing fields must fail validation.
   test('a drifting provider response VIOLATES the contract', async ({
     mock,
   }) => {
@@ -44,6 +47,7 @@ test.describe('Phase 17 · OpenAPI contract validation', () => {
     expect(result.errors.join(' ')).toMatch(/id|required/);
   });
 
+  // Guard: requesting a schema for an operation not in the spec throws immediately.
   test('extracting a schema for an undefined operation fails fast', () => {
     expect(() => contract.getResponseSchema('/nope', 'get')).toThrow(
       /No JSON schema/,

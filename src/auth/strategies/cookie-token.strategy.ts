@@ -14,14 +14,25 @@
  */
 import type { AuthStrategy, AuthHeaders } from '../auth.types.js';
 
+/**
+ * Auth strategy that carries a session token in the `Cookie` header.
+ */
 export class CookieTokenStrategy implements AuthStrategy {
+  /** Identifies this strategy in logs/diagnostics. */
   public readonly scheme = 'CookieToken';
 
+  /**
+   * @param token - The session token value issued at login.
+   * @param cookieName - Cookie key name; defaults to `token`.
+   */
   public constructor(
     private readonly token: string,
     private readonly cookieName: string = 'token',
   ) {}
 
+  /**
+   * @returns A `Cookie: <name>=<token>` header.
+   */
   public apply(): AuthHeaders {
     return { Cookie: `${this.cookieName}=${this.token}` };
   }

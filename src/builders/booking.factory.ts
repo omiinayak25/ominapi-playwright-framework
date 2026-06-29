@@ -19,6 +19,9 @@ import { faker } from '@faker-js/faker';
 import type { Booking } from '../models/booking.model.js';
 import { BookingBuilder } from './booking.builder.js';
 
+/**
+ * Factory of named, ready-made {@link Booking} scenarios (built atop the Builder).
+ */
 export class BookingFactory {
   /** A fully-random, VALID booking — the common case. */
   public static valid(): Booking {

@@ -16,15 +16,15 @@
 
 /** A persisted post as returned by the API (server-assigned `id`). */
 export interface Post {
-  readonly id: number;
-  readonly userId: number;
+  readonly id: number; // server-assigned identifier
+  readonly userId: number; // id of the authoring user
   readonly title: string;
   readonly body: string;
 }
 
 /** Payload for CREATING a post — no `id` (the server generates it). */
 export interface NewPost {
-  readonly userId: number;
+  readonly userId: number; // author the new post belongs to
   readonly title: string;
   readonly body: string;
 }

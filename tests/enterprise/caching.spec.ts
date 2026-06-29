@@ -14,7 +14,9 @@ import { TtlCache } from '../../src/utils/cache.js';
 import { delay } from '../../src/utils/retry.js';
 import { MockServer } from '../../src/utils/mock-server.js';
 
+// Unit-level checks of the TtlCache primitive (no HTTP involved).
 test.describe('Phase 20 · TtlCache (unit)', () => {
+  // Set then immediately get within the TTL window: value, presence, and size all reflect the stored entry.
   test('stores and returns a value within TTL', () => {
     const cache = new TtlCache<number>(1000);
     cache.set('a', 42);
@@ -23,6 +25,7 @@ test.describe('Phase 20 · TtlCache (unit)', () => {
     expect(cache.size).toBe(1);
   });
 
+  // After waiting past a short TTL, the entry is gone (lazy expiry on get).
   test('expires a value after the TTL', async () => {
     const cache = new TtlCache<string>(30);
     cache.set('k', 'v');
@@ -31,7 +34,9 @@ test.describe('Phase 20 · TtlCache (unit)', () => {
   });
 });
 
+// Integration: cache-enabled ApiClient against a mock server.
 test.describe('Phase 20 · ApiClient GET caching', () => {
+  // Two identical GETs return the same body, but only the first reaches the server.
   test('a repeated GET is served from cache (one server hit)', async () => {
     const server = new MockServer();
     await server.start();

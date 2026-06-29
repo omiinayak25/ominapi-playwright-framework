@@ -20,7 +20,9 @@ interface StatusCase {
 // Loaded SYNCHRONOUSLY at collection time so we can generate tests from it.
 const cases = loadJson<StatusCase[]>('status-cases.json');
 
+// Suite: each JSON case generates a test asserting the echo endpoint's status/ok.
 test.describe('Phase 8 · JSON-driven status codes', () => {
+  // One generated test per case: hit /status/<code> and verify status + ok flag.
   for (const c of cases) {
     test(`${c.name} -> HTTP ${c.code}`, async ({ echo }) => {
       const res = await echo.get(`/status/${c.code}`);

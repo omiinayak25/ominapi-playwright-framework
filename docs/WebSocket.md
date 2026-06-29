@@ -1,8 +1,8 @@
-# WebSocket Testing — OmniAPI Framework
+# WebSocket Testing — OminAPI Framework
 
 ## Overview
 
-OmniAPI provides deterministic, offline WebSocket testing through two classes:
+OminAPI provides deterministic, offline WebSocket testing through two classes:
 
 | Class                 | File                          | Role                                                   |
 | --------------------- | ----------------------------- | ------------------------------------------------------ |

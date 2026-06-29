@@ -15,6 +15,8 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 10 · Offset/limit pagination', () => {
+  // A single page must return exactly `limit` items, echo that limit, and
+  // report a total larger than one page (so paging is actually needed).
   test('a page honors limit and reports a stable total', async ({
     products,
   }) => {
@@ -25,6 +27,8 @@ test.describe('Phase 10 · Offset/limit pagination', () => {
     expect(res.body.total).toBeGreaterThan(5);
   });
 
+  // Fetch two adjacent pages; expect zero shared ids (no overlap/gaps) and an
+  // unchanged total — the core integrity guarantee of offset paging.
   test('consecutive pages do not overlap', async ({ products }) => {
     const page1 = await products.getAll(5, 0);
     const page2 = await products.getAll(5, 5);
@@ -38,12 +42,16 @@ test.describe('Phase 10 · Offset/limit pagination', () => {
     expect(page1.body.total).toBe(page2.body.total); // total is stable
   });
 
+  // Skipping beyond the dataset should still be a valid 200 with an empty list,
+  // not an error — graceful end-of-data behavior.
   test('skipping past the end yields an empty page', async ({ products }) => {
     const res = await products.getAll(5, 100_000);
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.products).toHaveLength(0);
   });
 
+  // Demonstrate cursor-like iteration on an offset API: advance skip by
+  // pageSize each call and expect the next batch to start at a different id.
   test('CURSOR-style: treat skip as an opaque cursor advanced each call', async ({
     products,
   }) => {

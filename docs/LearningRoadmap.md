@@ -1,7 +1,7 @@
 # Learning Roadmap
 
 A structured beginner → advanced learning path mapped to the 20 phases of
-OmniAPI. Study the phases in order — each one builds on the patterns and code
+OminAPI. Study the phases in order — each one builds on the patterns and code
 introduced before it.
 
 ---

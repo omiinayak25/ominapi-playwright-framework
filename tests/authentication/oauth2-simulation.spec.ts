@@ -28,7 +28,11 @@ interface BearerResponse {
   token: string;
 }
 
+// Suite: models the two-step OAuth2 client flow using two stand-in services
+// (auth server -> token, resource server -> validates the bearer token).
 test.describe('Phase 4 · OAuth2 flow (simulated)', () => {
+  // Scenario: log in to obtain a token, then use it to reach a protected resource.
+  // Expected: a truthy token, then 200/authenticated with that exact token echoed.
   test('obtain a token from the auth server, then access a protected resource', async ({
     auth,
     httpbin,

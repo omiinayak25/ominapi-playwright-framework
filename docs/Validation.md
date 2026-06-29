@@ -1,7 +1,7 @@
 # Validation — Reusable Response Assertion Helpers
 
 > **Module:** `src/validators/response.validator.ts` · `src/validators/index.ts`
-> **Repo:** <https://github.com/omiinayak25/omniapi-playwright-framework>
+> **Repo:** <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 

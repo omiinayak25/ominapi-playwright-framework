@@ -2,7 +2,7 @@
 
 ## Overview
 
-OmniAPI ships with three CI pipeline definitions and a Docker image. All three pipelines follow the same gate philosophy: static quality checks run first and block the more expensive test jobs on failure. GitHub Actions adds a sharded parallel test matrix for maximum speed.
+OminAPI ships with three CI pipeline definitions and a Docker image. All three pipelines follow the same gate philosophy: static quality checks run first and block the more expensive test jobs on failure. GitHub Actions adds a sharded parallel test matrix for maximum speed.
 
 | Platform       | File                                                      |
 | -------------- | --------------------------------------------------------- |
@@ -32,7 +32,7 @@ OmniAPI ships with three CI pipeline definitions and a Docker image. All three p
 
 ```ts
 export default function globalSetup(): void {
-  logger.info('OmniAPI suite starting', {
+  logger.info('OminAPI suite starting', {
     env: config.env,
     baseUrl: config.baseUrl,
     logLevel: config.logLevel,
@@ -226,7 +226,7 @@ Two sequential stages. Both run on `ubuntu-latest`.
           inputs:
             testResultsFormat: JUnit
             testResultsFiles: 'test-results/junit-results.xml'
-            testRunTitle: OmniAPI
+            testRunTitle: OminAPI
         - task: PublishBuildArtifacts@1
           condition: always()
           inputs:
@@ -264,8 +264,8 @@ CMD ["npm", "run", "test:ci"]
 ### Run locally in Docker
 
 ```bash
-docker build -t omniapi .
-docker run --rm omniapi
+docker build -t ominapi .
+docker run --rm ominapi
 ```
 
 ### Pass environment variables
@@ -274,7 +274,7 @@ docker run --rm omniapi
 docker run --rm \
   -e BASE_URL=https://staging.example.com \
   -e LOG_LEVEL=warn \
-  omniapi
+  ominapi
 ```
 
 ---
@@ -313,7 +313,7 @@ flowchart TD
     end
 
     subgraph Docker
-        DOCKER_BUILD[docker build -t omniapi .] --> DOCKER_RUN[docker run --rm omniapi\nCMD: npm run test:ci]
+        DOCKER_BUILD[docker build -t ominapi .] --> DOCKER_RUN[docker run --rm ominapi\nCMD: npm run test:ci]
     end
 ```
 

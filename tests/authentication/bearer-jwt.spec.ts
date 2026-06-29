@@ -26,10 +26,14 @@ interface BearerResponse {
 // A sample JWT (header.payload.signature). Not secret — for structure demo only.
 const SAMPLE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' + // header  {"alg":"HS256","typ":"JWT"}
-  '.eyJzdWIiOiIxMjM0IiwibmFtZSI6Ik9tbmlBUEkifQ' + // payload {"sub":"1234","name":"OmniAPI"}
+  '.eyJzdWIiOiIxMjM0IiwibmFtZSI6Ik9tbmlBUEkifQ' + // payload {"sub":"1234","name":"OminAPI"}
   '.s5hZ8Z3qd2bVrqQ9m0Xb3pX1kY2tF7nQwErTyUiOpA'; // signature
 
+// Suite: proves BearerTokenStrategy transmits any token string (opaque or JWT)
+// in the Authorization header, plus the structural anatomy of a JWT.
 test.describe('Phase 4 · Bearer / JWT (Strategy)', () => {
+  // Scenario: send an opaque bearer token to httpbin /bearer.
+  // Expected: 200, authenticated true, and the token echoed back unchanged.
   test('a bearer token is sent and accepted', async ({ httpbin }) => {
     const res = await httpbin.get<BearerResponse>('/bearer', {
       auth: new BearerTokenStrategy('opaque-token-abc123'),
@@ -40,11 +44,15 @@ test.describe('Phase 4 · Bearer / JWT (Strategy)', () => {
     expect(res.body.token).toBe('opaque-token-abc123');
   });
 
+  // Scenario: call /bearer with NoAuthStrategy (no Authorization header).
+  // Expected: 401 — the resource requires a bearer token.
   test('a missing bearer token is rejected with 401', async ({ httpbin }) => {
     const res = await httpbin.get('/bearer', { auth: new NoAuthStrategy() });
     expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
   });
 
+  // Scenario: a full JWT string is handed to the same strategy.
+  // Expected: the dotted JWT survives transmission byte-for-byte (no mangling).
   test('a JWT is transmitted intact as a bearer token', async ({ httpbin }) => {
     const res = await httpbin.get<BearerResponse>('/bearer', {
       auth: new BearerTokenStrategy(SAMPLE_JWT),
@@ -54,6 +62,9 @@ test.describe('Phase 4 · Bearer / JWT (Strategy)', () => {
     expect(res.body.token).toBe(SAMPLE_JWT);
   });
 
+  // Scenario: pure-local inspection of the sample JWT (no network call).
+  // Expected: exactly 3 dot-separated parts, and the base64url payload decodes to
+  // JSON whose `name` claim is the value we encoded.
   test('a JWT has the expected 3-part structure and decodable payload', () => {
     const parts = SAMPLE_JWT.split('.');
     expect(parts).toHaveLength(3); // header.payload.signature
@@ -65,6 +76,6 @@ test.describe('Phase 4 · Bearer / JWT (Strategy)', () => {
       'utf-8',
     );
     const payload = JSON.parse(json) as { sub: string; name: string };
-    expect(payload.name).toBe('OmniAPI');
+    expect(payload.name).toBe('OminAPI');
   });
 });

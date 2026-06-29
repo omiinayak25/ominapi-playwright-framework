@@ -2,7 +2,7 @@
 
 ## Overview
 
-OmniAPI includes an OWASP-style security test suite that fires known attack vectors at **public sandbox APIs** for authorized, defensive testing. The goal is to verify the API layer handles malicious inputs safely—not to exploit live production systems.
+OminAPI includes an OWASP-style security test suite that fires known attack vectors at **public sandbox APIs** for authorized, defensive testing. The goal is to verify the API layer handles malicious inputs safely—not to exploit live production systems.
 
 > **Scope:** All security tests target public sandbox endpoints (Restful-Booker, DummyJSON, httpbin). They are educational and defensive in nature. Never run these against systems you do not own or have explicit permission to test.
 

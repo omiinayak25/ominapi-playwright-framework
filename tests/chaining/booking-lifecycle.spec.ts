@@ -35,6 +35,10 @@ test.describe('Phase 7 · Booking lifecycle (request chaining)', () => {
   // Heroku flakiness insurance for this third-party E2E flow.
   test.describe.configure({ retries: 2 });
 
+  // Scenario: the full CRUD lifecycle of one booking, each step feeding the next
+  // via the shared ctx (token then bookingId).
+  // Expected: every step succeeds in order and the final read returns 404,
+  // confirming the resource was created, mutated, and ultimately removed.
   test('login -> create -> read -> update -> patch -> delete -> verify', async ({
     auth,
     bookings,
@@ -101,6 +105,9 @@ test.describe('Phase 7 · Booking lifecycle (request chaining)', () => {
     });
   });
 
+  // Scenario: create a booking, then fetch the full id listing.
+  // Expected: the new booking's id is present in the collection (chaining a created
+  // resource into a list query).
   test('newly created bookings appear in the collection listing', async ({
     bookings,
   }) => {

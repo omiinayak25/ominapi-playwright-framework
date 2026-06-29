@@ -1,4 +1,4 @@
-# Documentation Audit Report — OmniAPI
+# Documentation Audit Report — OminAPI
 
 **Generated:** 2026-06-28 · **Version:** 1.0.0 · **Scope:** full repository
 

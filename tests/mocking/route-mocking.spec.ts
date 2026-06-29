@@ -17,6 +17,8 @@ interface User {
 }
 
 test.describe('Phase 15 · Route mocking', () => {
+  // Register GET /users with a fixed body; expect the client to receive that
+  // exact payload (200, two users) — the canned response, served offline.
   test('a stubbed route returns the canned response', async ({ mock }) => {
     const { server, client } = mock;
     server.stub('GET', '/users', {
@@ -33,6 +35,8 @@ test.describe('Phase 15 · Route mocking', () => {
     expect(res.body[0]?.name).toBe('Ada');
   });
 
+  // Hit a path no stub was registered for; expect 404, proving the mock server
+  // matches routes exactly and doesn't fall through to a catch-all.
   test('an unregistered route returns 404', async ({ mock }) => {
     const res = await mock.client.get('/not-mocked');
     expect(res.status).toBe(HttpStatus.NOT_FOUND);

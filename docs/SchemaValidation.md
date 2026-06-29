@@ -1,7 +1,7 @@
 # Schema Validation — AJV, SchemaValidator Singleton, and JSON Schema Contracts
 
 > **Modules:** `src/validators/schema.validator.ts` · `src/schemas/*.ts` · `src/validators/index.ts`
-> **Repo:** <https://github.com/omiinayak25/omniapi-playwright-framework>
+> **Repo:** <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 

@@ -17,6 +17,9 @@
 import type { Booking } from '../models/booking.model.js';
 import { BookingFactory } from './booking.factory.js';
 
+/**
+ * Factory of intentionally malformed booking payloads for negative testing.
+ */
 export class NegativeBookingFactory {
   /** Missing required fields (only firstname present). */
   public static missingRequired(): Record<string, unknown> {

@@ -1,6 +1,6 @@
 # Interview Questions
 
-25+ senior QA / SDET interview questions grounded in the OmniAPI framework.
+25+ senior QA / SDET interview questions grounded in the OminAPI framework.
 Each answer references the actual implementation so you can open the code while
 you study.
 
@@ -88,10 +88,10 @@ on first access, stored in a `Map`, and reused across all 213 tests.
 
 ---
 
-### Q6. What is Dependency Injection and how does OmniAPI implement it?
+### Q6. What is Dependency Injection and how does OminAPI implement it?
 
 DI means a unit receives its dependencies rather than creating them. In
-OmniAPI, Playwright's `test.extend()` mechanism is used in
+OminAPI, Playwright's `test.extend()` mechanism is used in
 `src/fixtures/api.fixtures.ts`:
 
 ```typescript
@@ -161,7 +161,7 @@ behaviour (status, body content).
 schemas, required fields, status codes) matches a committed specification and
 that changes between versions are backward-compatible.
 
-In OmniAPI, `src/contracts/` holds the committed OpenAPI spec for Swagger
+In OminAPI, `src/contracts/` holds the committed OpenAPI spec for Swagger
 Petstore. `src/utils/contract-diff.ts` compares the live API against the
 committed spec and fails if a breaking change is detected (removed field, changed
 type, newly required property).
@@ -206,7 +206,7 @@ dependency is durably degraded.
 A TTL (time-to-live) cache stores the result of a call for a configurable
 duration and returns the cached value on subsequent calls within that window.
 
-In OmniAPI (`src/utils/cache.ts`), it is useful for:
+In OminAPI (`src/utils/cache.ts`), it is useful for:
 
 - Auth tokens — log in once per suite run rather than once per test.
 - Static reference data — fetch the product catalogue once and reuse it across
@@ -246,7 +246,7 @@ SLAs.
 
 ### Q16. What is the difference between a performance smoke test and a load test?
 
-**Performance smoke test** (what OmniAPI implements in `tests/performance/`):
+**Performance smoke test** (what OminAPI implements in `tests/performance/`):
 sends a small number of concurrent requests (e.g., 20) and asserts that p95
 latency stays under a threshold. It catches gross regressions in a CI pipeline
 in seconds.
@@ -261,7 +261,7 @@ degradation curves. Tools: k6, Gatling, Locust.
 
 ### Q17. What categories of negative tests should an API test framework cover?
 
-OmniAPI covers all of these in `tests/negative/` and `tests/security/`:
+OminAPI covers all of these in `tests/negative/` and `tests/security/`:
 
 - **Invalid input:** missing required fields, wrong types, out-of-range values,
   oversized payloads.
@@ -303,7 +303,7 @@ client-supplied claims at face value.
 | Network-dependent    | Yes (3rd-party API)   | Not if mocked       |
 | Payload-specific     | Random data collision | Deterministic input |
 
-Strategy in OmniAPI:
+Strategy in OminAPI:
 
 - `retries: isCI ? 2 : 0` — repeated CI failure = real failure.
 - `LOG_LEVEL=debug` + trace-on-first-retry — the trace file captures the exact
@@ -318,7 +318,7 @@ API tests are I/O-bound: the test runner is idle while waiting for HTTP
 responses. Parallel execution saturates that idle time, running all 213 tests in
 a fraction of the sequential time. There is no shared browser state (no DOM), so
 test isolation is trivially maintained. The only risk is shared stateful API
-resources — OmniAPI solves this by creating and deleting resources within each
+resources — OminAPI solves this by creating and deleting resources within each
 test rather than relying on pre-seeded data.
 
 ---
@@ -336,7 +336,7 @@ just that individual endpoints return 200 in isolation.
 
 ---
 
-### Q22. How does data-driven testing work in OmniAPI?
+### Q22. How does data-driven testing work in OminAPI?
 
 `src/utils/data-loader.ts` loads test data from JSON, CSV, and Excel files.
 Parameterized tests iterate over the loaded rows:
@@ -358,7 +358,7 @@ row to a data file, not writing new test code.
 
 ### Q23. How do you ensure a test leaves no side effects (test isolation)?
 
-Three strategies used in OmniAPI:
+Three strategies used in OminAPI:
 
 1. **Teardown in fixture:** `src/fixtures/api.fixtures.ts` disposes clients and
    any created resources after each test via the `use()/after` lifecycle.

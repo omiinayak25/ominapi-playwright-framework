@@ -19,6 +19,7 @@ interface UploadEcho {
 }
 
 test.describe('Phase 11 · Multipart upload', () => {
+  // POST a CSV file plus a scalar field as multipart; the echo server returns both, proving exact byte round-trip.
   test('uploads a CSV file and a field; server receives exact content', async ({
     httpbin,
   }) => {
@@ -38,6 +39,7 @@ test.describe('Phase 11 · Multipart upload', () => {
     expect(res.body.form.description?.[0]).toBe('omni-upload');
   });
 
+  // Binary (PNG) bytes upload cleanly as a multipart file part; the server confirms it received the part.
   test('uploads binary image bytes via multipart', async ({ httpbin }) => {
     // A tiny PNG-headed buffer stands in for an image file.
     const pngBytes = Buffer.from([

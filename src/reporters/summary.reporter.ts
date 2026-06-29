@@ -25,20 +25,27 @@ import type {
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+/** One captured test outcome, accumulated during the run for the final summary. */
 interface TestRecord {
   readonly title: string;
   readonly status: TestResult['status'];
   readonly durationMs: number;
 }
 
+/**
+ * Custom Playwright reporter that prints a run summary and writes summary.json.
+ * Implements the Reporter lifecycle hooks (onBegin/onTestEnd/onEnd).
+ */
 export default class SummaryReporter implements Reporter {
   private readonly records: TestRecord[] = [];
   private startTime = 0;
 
+  /** Run start — record the wall-clock start so onEnd can compute total duration. */
   public onBegin(_config: unknown, _suite: Suite): void {
     this.startTime = Date.now();
   }
 
+  /** Per-test hook — capture the test's full title, status, and duration. */
   public onTestEnd(test: TestCase, result: TestResult): void {
     this.records.push({
       // titlePath: ['', '<file>', '<describe>', '<test>'] — drop the empty root.
@@ -48,6 +55,7 @@ export default class SummaryReporter implements Reporter {
     });
   }
 
+  /** Run finished — aggregate counts, find the slowest tests, and emit both artifacts. */
   public onEnd(result: FullResult): void {
     const totalMs = Date.now() - this.startTime;
     const count = (status: TestResult['status']): number =>
@@ -78,7 +86,7 @@ export default class SummaryReporter implements Reporter {
     // Human-readable console block (process.stdout to avoid console linting).
     const lines = [
       '',
-      '──────────── OmniAPI Run Summary ────────────',
+      '──────────── OminAPI Run Summary ────────────',
       ` result   : ${summary.result}`,
       ` total    : ${summary.total}`,
       ` passed   : ${summary.passed}`,

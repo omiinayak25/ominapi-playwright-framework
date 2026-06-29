@@ -14,9 +14,16 @@
  */
 import type { AuthStrategy, AuthHeaders } from '../auth.types.js';
 
+/**
+ * Null-object auth strategy: satisfies the interface but adds no headers.
+ */
 export class NoAuthStrategy implements AuthStrategy {
+  /** Identifies this strategy in logs/diagnostics. */
   public readonly scheme = 'None';
 
+  /**
+   * @returns An empty header set (no authentication applied).
+   */
   public apply(): AuthHeaders {
     return {};
   }

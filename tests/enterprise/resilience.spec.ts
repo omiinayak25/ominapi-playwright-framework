@@ -19,6 +19,7 @@ import { MockServer } from '../../src/utils/mock-server.js';
 import { delay } from '../../src/utils/retry.js';
 
 test.describe('Phase 20 · Resilience — retry', () => {
+  // Mock fails with 503 on the first two calls then returns 200; the retry policy turns this into a single successful result.
   test('ApiClient retries transient 503s then succeeds', async () => {
     const server = new MockServer();
     await server.start();
@@ -43,6 +44,7 @@ test.describe('Phase 20 · Resilience — retry', () => {
     await server.stop();
   });
 
+  // withRetry re-invokes on a thrown error until success, but skips retries entirely when shouldRetry returns false.
   test('withRetry retries on throw and respects shouldRetry', async () => {
     let attempts = 0;
     const result = await withRetry(
@@ -72,6 +74,7 @@ test.describe('Phase 20 · Resilience — retry', () => {
 });
 
 test.describe('Phase 20 · Resilience — circuit breaker', () => {
+  // After enough consecutive failures the breaker flips OPEN and rejects further calls immediately without invoking the function.
   test('opens after the failure threshold and fails fast', async () => {
     const breaker = new CircuitBreaker(2, 10_000);
     const boom = (): Promise<never> => Promise.reject(new Error('down'));
@@ -92,6 +95,7 @@ test.describe('Phase 20 · Resilience — circuit breaker', () => {
     expect(invoked).toBe(false);
   });
 
+  // Once the cooldown elapses the breaker half-opens; a successful trial call closes it again.
   test('half-opens after cooldown and closes on success', async () => {
     const breaker = new CircuitBreaker(1, 50); // trip after 1 failure, 50ms cooldown
     await expect(

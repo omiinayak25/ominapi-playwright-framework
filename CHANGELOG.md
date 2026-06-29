@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **OmniAPI** are documented here.
+All notable changes to **OminAPI** are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
@@ -91,4 +91,4 @@ First complete release — all 20 phases implemented, **213 tests passing**.
 
 ## Release links
 
-- Repository: <https://github.com/omiinayak25/omniapi-playwright-framework>
+- Repository: <https://github.com/omiinayak25/ominapi-playwright-framework>

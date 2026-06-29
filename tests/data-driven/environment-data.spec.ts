@@ -21,7 +21,9 @@ interface EnvData {
   sampleProductId: number;
 }
 
+// Suite: same logic, environment-selected dataset (TEST_ENV picks the JSON file).
 test.describe('Phase 8 · Environment-driven data', () => {
+  // Load the active env's dataset and assert the API matches its expectations.
   test(`loads and uses the dataset for env="${config.env}"`, async ({
     products,
   }) => {

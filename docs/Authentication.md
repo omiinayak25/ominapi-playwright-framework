@@ -1,13 +1,13 @@
 # Authentication
 
-> OmniAPI framework — Phase 4 authentication strategies.
-> Repo: <https://github.com/omiinayak25/omniapi-playwright-framework>
+> OminAPI framework — Phase 4 authentication strategies.
+> Repo: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 
 ## Overview
 
-OmniAPI implements authentication through the **Strategy pattern**. Every auth scheme is a small class that implements a single `AuthStrategy` interface. The `ApiClient` accepts any strategy — either as a client-wide default or as a per-request override — so swapping schemes requires changing one object, never rewriting request logic.
+OminAPI implements authentication through the **Strategy pattern**. Every auth scheme is a small class that implements a single `AuthStrategy` interface. The `ApiClient` accepts any strategy — either as a client-wide default or as a per-request override — so swapping schemes requires changing one object, never rewriting request logic.
 
 ---
 
@@ -250,7 +250,7 @@ const res = await client.get('/protected', {
 
 ## OAuth2 Simulation
 
-> **Important:** OmniAPI does not connect to a real OAuth2 authorization server. The flow is explicitly labelled a simulation.
+> **Important:** OminAPI does not connect to a real OAuth2 authorization server. The flow is explicitly labelled a simulation.
 
 There is no free, keyless OAuth2 client-credentials sandbox available to the framework. The simulation models the two-step pattern honestly using two real APIs:
 
@@ -363,7 +363,7 @@ The lifecycle test (`tests/chaining/booking-lifecycle.spec.ts`) extends this fur
 
 ## Interview Questions
 
-1. **What is the Strategy pattern and why does OmniAPI use it for auth?**
+1. **What is the Strategy pattern and why does OminAPI use it for auth?**
    Each scheme implements `AuthStrategy.apply()` returning headers. Swapping schemes requires changing one constructor argument, not test logic.
 
 2. **What does `NoAuthStrategy` solve that `undefined` does not?**
@@ -372,7 +372,7 @@ The lifecycle test (`tests/chaining/booking-lifecycle.spec.ts`) extends this fur
 3. **How does per-request auth override client-level auth in `ApiClient`?**
    `const strategy = auth ?? this.auth;` — the per-request option takes precedence.
 
-4. **Why is the OAuth2 flow in OmniAPI called a simulation?**
+4. **Why is the OAuth2 flow in OminAPI called a simulation?**
    No free keyless OAuth2 server exists for public testing. Restful Booker `/auth` plays the authorization server and httpbin `/bearer` plays the resource server. The two-step pattern is real; the servers are stand-ins.
 
 5. **Why does Restful Booker return 201 on a successful DELETE?**

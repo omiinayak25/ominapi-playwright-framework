@@ -1,13 +1,13 @@
-# Design Patterns in OmniAPI
+# Design Patterns in OminAPI
 
 ## Overview
 
-OmniAPI implements ten enterprise design patterns. Each one solves a concrete
+OminAPI implements ten enterprise design patterns. Each one solves a concrete
 problem in a test framework: DRY violations, brittle test data, untestable
 configurations, and error-handling gaps. This document identifies each pattern,
 maps it to its source file, explains why it was chosen, and shows a real snippet.
 
-Repository: <https://github.com/omiinayak25/omniapi-playwright-framework>
+Repository: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 

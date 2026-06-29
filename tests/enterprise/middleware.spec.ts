@@ -15,6 +15,7 @@ import type { ApiResponse } from '../../src/api-client/index.js';
 import { MockServer } from '../../src/utils/mock-server.js';
 
 test.describe('Phase 20 · Middleware', () => {
+  // With correlationId enabled and no header supplied, the client generates one; the mock captures a non-empty x-correlation-id.
   test('auto-injects a correlation id when none is provided', async () => {
     const server = new MockServer();
     await server.start();
@@ -33,6 +34,7 @@ test.describe('Phase 20 · Middleware', () => {
     await server.stop();
   });
 
+  // When the caller passes an explicit x-correlation-id, the middleware leaves it untouched.
   test('does not overwrite a caller-provided correlation id', async () => {
     const server = new MockServer();
     await server.start();
@@ -54,6 +56,7 @@ test.describe('Phase 20 · Middleware', () => {
     await server.stop();
   });
 
+  // Custom request middleware mutates outgoing headers; response middleware fires for the response (status recorded).
   test('custom request & response middleware run', async () => {
     const server = new MockServer();
     await server.start();

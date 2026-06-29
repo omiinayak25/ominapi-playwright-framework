@@ -18,7 +18,11 @@ import { config } from '../../src/config/index.js';
 import { logger } from '../../src/utils/logger.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
+// Suite: validates the core framework scaffolding (config, constants, logger).
 test.describe('Phase 1 · Framework health', () => {
+  // Scenario: ConfigManager produces a well-formed, typed config object.
+  // Expected: baseUrl is an http(s) URL, env is a known value, timeout is positive,
+  // and the httpbin endpoint is configured.
   test('ConfigManager loads a valid, typed configuration', () => {
     expect(config.baseUrl).toMatch(/^https?:\/\//);
     expect(['dev', 'staging', 'prod']).toContain(config.env);
@@ -26,12 +30,16 @@ test.describe('Phase 1 · Framework health', () => {
     expect(config.endpoints.httpbin).toContain('httpbin');
   });
 
+  // Scenario: the HttpStatus constant map holds the right numeric codes.
+  // Expected: named constants resolve to their canonical HTTP status numbers.
   test('HttpStatus constants expose the expected codes', () => {
     expect(HttpStatus.OK).toBe(200);
     expect(HttpStatus.CREATED).toBe(201);
     expect(HttpStatus.NOT_FOUND).toBe(404);
   });
 
+  // Scenario: the shared logger is importable and usable.
+  // Expected: logger.info is a function and a debug call executes without throwing.
   test('Logger is available and callable', () => {
     expect(typeof logger.info).toBe('function');
     logger.debug('Framework health smoke test executed');

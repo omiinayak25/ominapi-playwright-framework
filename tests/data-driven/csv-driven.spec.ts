@@ -24,11 +24,14 @@ interface BookingRow {
   additionalneeds: string;
 }
 
+// Load synchronously at collection time so one test() is generated per CSV row.
 const rows = loadCsv<BookingRow>('bookings.csv');
 
+// Suite: each CSV row drives a booking-creation test (with string->type coercion).
 test.describe('Phase 8 · CSV-driven booking creation', () => {
   test.describe.configure({ retries: 2 }); // Booker (Heroku) flakiness insurance
 
+  // One generated test per row: each booking is created and echoed back -> 200.
   for (const row of rows) {
     test(`creates booking for ${row.firstname} ${row.lastname}`, async ({
       bookings,

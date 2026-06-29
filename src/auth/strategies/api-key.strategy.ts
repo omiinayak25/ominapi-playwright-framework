@@ -14,14 +14,25 @@
  */
 import type { AuthStrategy, AuthHeaders } from '../auth.types.js';
 
+/**
+ * Auth strategy that injects a static API key into a configurable header.
+ */
 export class ApiKeyStrategy implements AuthStrategy {
+  /** Identifies this strategy in logs/diagnostics. */
   public readonly scheme = 'ApiKey';
 
+  /**
+   * @param headerName - Header to carry the key (e.g. `x-api-key`, `apikey`).
+   * @param key - The API key value sent on every request.
+   */
   public constructor(
     private readonly headerName: string,
     private readonly key: string,
   ) {}
 
+  /**
+   * @returns A single header mapping the configured name to the key.
+   */
   public apply(): AuthHeaders {
     // Computed property name lets the caller choose the header (x-api-key, etc.).
     return { [this.headerName]: this.key };

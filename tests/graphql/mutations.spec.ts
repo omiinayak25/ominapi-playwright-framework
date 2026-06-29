@@ -16,8 +16,11 @@ interface CreatedPost {
   createPost: { id: string; title: string; body: string };
 }
 
+// Suite: GraphQL mutations write data and return the requested result fields.
 test.describe('Phase 14 · GraphQL mutations', () => {
   test.describe.configure({ retries: 2 }); // external GraphQL endpoint can blip
+  // Scenario: run createPost with an input object passed as a variable.
+  // Expected: HTTP 200 and the created post echoes the input plus a server-assigned id.
   test('createPost mutation with variables returns the new resource', async ({
     graphqlZero,
   }) => {
@@ -32,12 +35,12 @@ test.describe('Phase 14 · GraphQL mutations', () => {
     `;
 
     const res = await graphqlZero.mutate<CreatedPost>(mutation, {
-      input: { title: 'OmniAPI Phase 14', body: 'GraphQL mutation test' },
+      input: { title: 'OminAPI Phase 14', body: 'GraphQL mutation test' },
     });
 
     expect(res.status).toBe(HttpStatus.OK);
     const data = graphqlData(res);
-    expect(data.createPost.title).toBe('OmniAPI Phase 14');
+    expect(data.createPost.title).toBe('OminAPI Phase 14');
     expect(data.createPost.body).toBe('GraphQL mutation test');
     expect(data.createPost.id).toBeTruthy(); // server assigned an id
   });

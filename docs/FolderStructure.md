@@ -1,6 +1,6 @@
 # Folder Structure
 
-A map of every directory and key file in OmniAPI, with the responsibility of
+A map of every directory and key file in OminAPI, with the responsibility of
 each `src/` subfolder and each `tests/` phase folder.
 
 ---
@@ -16,7 +16,7 @@ files govern tooling and CI. The `docs/` folder holds this documentation set.
 ## Full Directory Tree
 
 ```
-omniapi-playwright-framework/
+ominapi-playwright-framework/
 │
 ├── .github/
 │   └── workflows/

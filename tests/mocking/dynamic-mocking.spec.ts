@@ -12,6 +12,8 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 15 · Dynamic mocking', () => {
+  // Handler reads req.query.name and interpolates it; expect the greeting to
+  // reflect the value the client passed, falling back to 'stranger' otherwise.
   test('response is computed from query parameters', async ({ mock }) => {
     const { server, client } = mock;
     server.on('GET', '/greet', (req) => ({
@@ -24,6 +26,8 @@ test.describe('Phase 15 · Dynamic mocking', () => {
     expect(res.body.message).toBe('Hello, Omni!');
   });
 
+  // Echo endpoint mirrors the request body back; expect the round-tripped
+  // payload (including nested objects) to deep-equal what was sent.
   test('handler echoes the posted body', async ({ mock }) => {
     const { server, client } = mock;
     server.on('POST', '/echo', (req) => ({ body: { received: req.body } }));
@@ -35,6 +39,8 @@ test.describe('Phase 15 · Dynamic mocking', () => {
     expect(res.body.received).toEqual(payload);
   });
 
+  // Handler branches on input: id=1 -> 200, anything else -> 404. Expect the
+  // status to track the request, proving response logic can be data-driven.
   test('handler returns a conditional status based on input', async ({
     mock,
   }) => {

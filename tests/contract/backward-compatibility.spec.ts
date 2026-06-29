@@ -26,7 +26,9 @@ const v1: SchemaObject = {
   },
 };
 
+// Suite: diff old vs new schemas and classify each change as safe or breaking.
 test.describe('Phase 17 · Backward compatibility', () => {
+  // Adding an optional, non-required property must NOT break consumers.
   test('adding a new optional field is backward COMPATIBLE', () => {
     const v2: SchemaObject = {
       type: 'object',
@@ -42,6 +44,7 @@ test.describe('Phase 17 · Backward compatibility', () => {
     expect(detectBreakingChanges(v1, v2)).toHaveLength(0);
   });
 
+  // Dropping a property a consumer may rely on is a breaking change.
   test('removing a field is BREAKING', () => {
     const v2: SchemaObject = {
       type: 'object',
@@ -55,6 +58,7 @@ test.describe('Phase 17 · Backward compatibility', () => {
     ).toBe(true);
   });
 
+  // Altering a field's declared type can break clients parsing it.
   test('changing a field type is BREAKING', () => {
     const v2: SchemaObject = {
       type: 'object',
@@ -71,6 +75,7 @@ test.describe('Phase 17 · Backward compatibility', () => {
     ).toBe(true);
   });
 
+  // Relaxing a field from required to optional weakens the guarantee clients depend on.
   test('dropping a field from required is BREAKING', () => {
     const v2: SchemaObject = {
       type: 'object',

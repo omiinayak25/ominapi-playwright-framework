@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Concrete issues encountered during OmniAPI development, with root causes and
+Concrete issues encountered during OminAPI development, with root causes and
 exact fixes. Run all commands from the repository root.
 
 ---

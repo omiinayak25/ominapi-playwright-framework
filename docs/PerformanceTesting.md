@@ -2,9 +2,9 @@
 
 ## Overview
 
-OmniAPI includes a **smoke-level** performance test suite built around `PerfHelper`—a lightweight utility for timing individual requests, running concurrent batches, and computing latency percentiles. The suite validates SLAs and basic concurrency health as part of the functional test run.
+OminAPI includes a **smoke-level** performance test suite built around `PerfHelper`—a lightweight utility for timing individual requests, running concurrent batches, and computing latency percentiles. The suite validates SLAs and basic concurrency health as part of the functional test run.
 
-> **Scope:** This is not a load-testing tool. For sustained high-RPS load testing use k6 or Gatling. OmniAPI's performance tests are a sanity gate that runs alongside functional tests to catch obvious regressions early.
+> **Scope:** This is not a load-testing tool. For sustained high-RPS load testing use k6 or Gatling. OminAPI's performance tests are a sanity gate that runs alongside functional tests to catch obvious regressions early.
 
 ---
 
@@ -107,7 +107,7 @@ Averages hide the slow tail that users actually experience. Consider 10 requests
 | p95    | 5000 ms — the real user experience for 5% of traffic |
 | p99    | 5000 ms                                              |
 
-SLA assertions in OmniAPI always use **p95** or **p99**, not the average. `stats.avg` is logged for informational purposes only.
+SLA assertions in OminAPI always use **p95** or **p99**, not the average. `stats.avg` is logged for informational purposes only.
 
 ---
 
@@ -312,7 +312,7 @@ logger.info('Perf stats', { ...stats }); // captured in CI log; queryable in All
 
 ## Interview Questions
 
-1. **Why do OmniAPI performance tests use p95 rather than the average?**
+1. **Why do OminAPI performance tests use p95 rather than the average?**
    Averages mask slow outliers. If 5% of requests take 5 seconds but the average is 600 ms, SLA-by-average passes while real users experience a slow tail. p95 captures the worst experience for 5% of traffic.
 
 2. **What does `batch.totalMs < sumDurations` prove?**
@@ -321,7 +321,7 @@ logger.info('Perf stats', { ...stats }); // captured in CI log; queryable in All
 3. **How does `PerfHelper.stats` compute the p95 percentile?**
    It sorts the durations array ascending, then uses the nearest-rank method: `rank = ceil(0.95 * n)`, `index = rank - 1` (clamped). The value at that index is p95.
 
-4. **What distinguishes smoke load (OmniAPI) from load testing (k6/Gatling)?**
+4. **What distinguishes smoke load (OminAPI) from load testing (k6/Gatling)?**
    Smoke load runs a small number of rounds (3 × 5 requests) to confirm the API does not crash and returns a 100% success rate under modest traffic. k6/Gatling sustain high RPS for minutes or hours to find throughput limits, memory leaks, and degradation curves.
 
 5. **Why are SLA tests annotated with `retries: 2`?**

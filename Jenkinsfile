@@ -1,5 +1,5 @@
 // =============================================================================
-// Jenkinsfile — OmniAPI pipeline (Declarative)
+// Jenkinsfile — OminAPI pipeline (Declarative)
 // -----------------------------------------------------------------------------
 // Mirrors the GitHub Actions gates for teams on Jenkins: install -> quality
 // gate -> tests -> publish JUnit results & archive HTML/Allure artifacts.

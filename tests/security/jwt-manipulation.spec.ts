@@ -25,7 +25,7 @@ import {
 } from '../../src/utils/jwt.js';
 
 test.describe('Phase 12 · JWT manipulation', () => {
-  const original = createJwt({ sub: '1234', name: 'OmniAPI', role: 'user' });
+  const original = createJwt({ sub: '1234', name: 'OminAPI', role: 'user' });
 
   test('a JWT decodes into header, payload, signature', () => {
     const decoded = decodeJwt(original);

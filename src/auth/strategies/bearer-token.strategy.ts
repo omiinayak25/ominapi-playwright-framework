@@ -18,11 +18,21 @@
  */
 import type { AuthStrategy, AuthHeaders } from '../auth.types.js';
 
+/**
+ * Auth strategy that emits an `Authorization: Bearer <token>` header.
+ */
 export class BearerTokenStrategy implements AuthStrategy {
+  /** Identifies this strategy in logs/diagnostics. */
   public readonly scheme = 'Bearer';
 
+  /**
+   * @param token - The bearer/JWT string to send (typically from a prior login).
+   */
   public constructor(private readonly token: string) {}
 
+  /**
+   * @returns An `Authorization: Bearer <token>` header.
+   */
   public apply(): AuthHeaders {
     return { Authorization: `Bearer ${this.token}` };
   }

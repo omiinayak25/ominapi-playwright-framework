@@ -1,6 +1,6 @@
 # Changelog
 
-This page gives a quick summary of what changed in OmniAPI v1.0.0.
+This page gives a quick summary of what changed in OminAPI v1.0.0.
 The full, authoritative changelog (Keep a Changelog format, Semantic Versioning)
 is at [../CHANGELOG.md](../CHANGELOG.md).
 

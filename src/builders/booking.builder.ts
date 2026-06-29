@@ -33,7 +33,11 @@ interface BookingDraft {
   additionalneeds?: string;
 }
 
+/**
+ * Fluent test-data builder that assembles a valid {@link Booking} step by step.
+ */
 export class BookingBuilder {
+  /** Private: instances are created via {@link BookingBuilder.aBooking}. */
   private constructor(private readonly draft: BookingDraft) {}
 
   /**
@@ -57,32 +61,41 @@ export class BookingBuilder {
     });
   }
 
+  /** Override the guest's first name. @returns this builder for chaining. */
   public withFirstname(firstname: string): this {
     this.draft.firstname = firstname;
     return this;
   }
 
+  /** Override the guest's last name. @returns this builder for chaining. */
   public withLastname(lastname: string): this {
     this.draft.lastname = lastname;
     return this;
   }
 
+  /** Override the total price. @returns this builder for chaining. */
   public withTotalPrice(totalprice: number): this {
     this.draft.totalprice = totalprice;
     return this;
   }
 
+  /** Override the deposit-paid flag. @returns this builder for chaining. */
   public withDepositPaid(depositpaid: boolean): this {
     this.draft.depositpaid = depositpaid;
     return this;
   }
 
+  /**
+   * Override both check-in and check-out dates (ISO strings).
+   * @returns this builder for chaining.
+   */
   public withDates(checkin: string, checkout: string): this {
     this.draft.checkin = checkin;
     this.draft.checkout = checkout;
     return this;
   }
 
+  /** Set the optional additional-needs field. @returns this builder for chaining. */
   public withAdditionalNeeds(needs: string): this {
     this.draft.additionalneeds = needs;
     return this;

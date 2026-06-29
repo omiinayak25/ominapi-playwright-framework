@@ -17,7 +17,7 @@ export interface Product {
   readonly price: number;
   readonly description: string;
   readonly category: string;
-  readonly stock: number;
+  readonly stock: number; // available inventory count
 }
 
 /**
@@ -26,10 +26,10 @@ export interface Product {
  * Modeling this is the difference between a robust repository and guesswork.
  */
 export interface ProductList {
-  readonly products: Product[];
-  readonly total: number;
-  readonly skip: number;
-  readonly limit: number;
+  readonly products: Product[]; // items on this page
+  readonly total: number; // total matching items across all pages
+  readonly skip: number; // offset applied to this page
+  readonly limit: number; // page size requested
 }
 
 /**
@@ -45,6 +45,6 @@ export interface NewProduct {
 
 /** DummyJSON's DELETE response adds soft-delete metadata to the product. */
 export interface DeletedProduct extends Product {
-  readonly isDeleted: boolean;
-  readonly deletedOn: string;
+  readonly isDeleted: boolean; // true once soft-deleted
+  readonly deletedOn: string; // ISO timestamp of the deletion
 }

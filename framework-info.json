@@ -1,5 +1,5 @@
 {
-  "framework": "OmniAPI",
+  "framework": "OminAPI",
   "version": "1.0.0",
   "type": "API Test Automation Framework",
   "engine": "Playwright Test",

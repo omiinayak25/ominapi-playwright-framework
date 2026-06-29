@@ -2,12 +2,12 @@
 
 ## Overview
 
-`ApiClient` is the central HTTP abstraction in OmniAPI. It wraps Playwright's
+`ApiClient` is the central HTTP abstraction in OminAPI. It wraps Playwright's
 `APIRequestContext` behind five clean verb methods, normalizes every response into
 a consistent `ApiResponse<T>` shape, and provides opt-in enterprise features
 (retry, TTL cache, correlation IDs, middleware) through `ApiClientOptions`.
 
-Repository: <https://github.com/omiinayak25/omniapi-playwright-framework>
+Repository: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 Source files:
 
@@ -229,7 +229,7 @@ test('GET /get echoes headers', async ({ httpbin }) => {
 
 ```typescript
 test('JSON body is serialized correctly', async ({ echo }) => {
-  const payload = { framework: 'OmniAPI', nested: { level: 2 } };
+  const payload = { framework: 'OminAPI', nested: { level: 2 } };
 
   const res = await echo.post<PostmanEcho>('/post', { data: payload });
 

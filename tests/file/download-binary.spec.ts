@@ -17,6 +17,7 @@ import { FileHelper } from '../../src/utils/file.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 11 · Binary download', () => {
+  // GET a PNG, confirm the content-type, read raw bytes, and prove it's really a PNG via magic bytes; saved file size matches.
   test('downloads a PNG and verifies type by magic bytes', async ({
     httpbin,
   }) => {
@@ -34,6 +35,7 @@ test.describe('Phase 11 · Binary download', () => {
     expect(FileHelper.size(saved)).toBe(bytes.length);
   });
 
+  // Requesting /bytes/256 returns exactly 256 octet-stream bytes — no truncation or text mangling.
   test('downloads an exact number of raw bytes', async ({ httpbin }) => {
     const res = await httpbin.get('/bytes/256');
     expect(res.status).toBe(HttpStatus.OK);

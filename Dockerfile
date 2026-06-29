@@ -1,5 +1,5 @@
 # =============================================================================
-# Dockerfile — Containerized OmniAPI test runner
+# Dockerfile — Containerized OminAPI test runner
 # -----------------------------------------------------------------------------
 # WHY: environment parity — the SAME image runs locally and in CI, eliminating
 # "works on my machine". API-only suite needs no browsers, so a slim Node image

@@ -14,14 +14,25 @@
  */
 import type { AuthStrategy, AuthHeaders } from '../auth.types.js';
 
+/**
+ * Auth strategy that emits an HTTP Basic `Authorization` header.
+ */
 export class BasicAuthStrategy implements AuthStrategy {
+  /** Identifies this strategy in logs/diagnostics. */
   public readonly scheme = 'Basic';
 
+  /**
+   * @param username - Account/user portion of the credential pair.
+   * @param password - Secret portion of the credential pair.
+   */
   public constructor(
     private readonly username: string,
     private readonly password: string,
   ) {}
 
+  /**
+   * @returns An `Authorization: Basic <base64(user:pass)>` header.
+   */
   public apply(): AuthHeaders {
     // Base64-encode "user:pass". Buffer is the Node-native, dependency-free way.
     const encoded = Buffer.from(`${this.username}:${this.password}`).toString(

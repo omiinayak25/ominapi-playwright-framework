@@ -14,8 +14,13 @@
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 
+/**
+ * Playwright global-setup hook. Importing `config` above forces ConfigManager
+ * validation (fail-fast), and this logs a one-time banner recording the env,
+ * base URL, log level, and whether the run is in CI.
+ */
 export default function globalSetup(): void {
-  logger.info('OmniAPI suite starting', {
+  logger.info('OminAPI suite starting', {
     env: config.env,
     baseUrl: config.baseUrl,
     logLevel: config.logLevel,

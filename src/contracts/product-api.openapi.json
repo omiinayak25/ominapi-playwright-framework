@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "OmniAPI Product Contract",
+    "title": "OminAPI Product Contract",
     "version": "1.0.0",
     "description": "Contract describing the Product resource (modeled on DummyJSON)."
   },

@@ -1,13 +1,13 @@
 # Data-Driven Testing
 
-> OmniAPI framework — Phase 8 data-driven testing patterns.
-> Repo: <https://github.com/omiinayak25/omniapi-playwright-framework>
+> OminAPI framework — Phase 8 data-driven testing patterns.
+> Repo: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 
 ## Overview
 
-Data-driven testing separates test **logic** from test **data**. OmniAPI supports four data formats — JSON, CSV, Excel, and environment-specific JSON datasets — through a single `data-loader` module. Adding a test case means adding a row to a file, not editing TypeScript.
+Data-driven testing separates test **logic** from test **data**. OminAPI supports four data formats — JSON, CSV, Excel, and environment-specific JSON datasets — through a single `data-loader` module. Adding a test case means adding a row to a file, not editing TypeScript.
 
 ---
 

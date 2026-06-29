@@ -16,6 +16,11 @@ import type { SchemaObject } from 'ajv';
 /** Directory holding committed contract documents. */
 const CONTRACTS_DIR = path.resolve(process.cwd(), 'src', 'contracts');
 
+/**
+ * Minimal shape of an OpenAPI document — only the parts this class reads.
+ * `paths` is keyed by URL template, then by HTTP method; `components.schemas`
+ * holds the reusable definitions that $ref pointers target.
+ */
 interface OpenApiSpec {
   openapi?: string;
   info: { title: string; version: string };
@@ -23,6 +28,10 @@ interface OpenApiSpec {
   components?: { schemas?: Record<string, unknown> };
 }
 
+/**
+ * A single operation's response map: status code -> media type -> schema.
+ * We only care about the response schemas for contract validation.
+ */
 interface OpenApiOperation {
   responses?: Record<
     string,

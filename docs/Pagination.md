@@ -1,13 +1,13 @@
 # Pagination
 
-> OmniAPI framework — Phase 10 pagination patterns.
-> Repo: <https://github.com/omiinayak25/omniapi-playwright-framework>
+> OminAPI framework — Phase 10 pagination patterns.
+> Repo: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 
 ## Overview
 
-OmniAPI covers three pagination styles found in real-world APIs:
+OminAPI covers three pagination styles found in real-world APIs:
 
 | Style                      | API used        | Parameters                          | Result shape                                       |
 | -------------------------- | --------------- | ----------------------------------- | -------------------------------------------------- |
@@ -355,7 +355,7 @@ public byState(state: string, perPage = 10) {
 
 When an `APIRequestContext` has a `baseURL` that includes a path (e.g., `https://api.openbrewerydb.org/v1`), appending a leading-slash path like `/breweries` drops the `v1` prefix per `new URL()` semantics.
 
-OmniAPI avoids this by:
+OminAPI avoids this by:
 
 1. Setting `openBrewery` in `ConfigManager` to the **origin only**: `https://api.openbrewerydb.org`
 2. Including the `/v1` prefix inside `BreweryService`'s resource path: `super(client, '/v1/breweries')`
@@ -397,7 +397,7 @@ This pattern generalises: always configure `baseURL` as a bare origin when the A
 
 ## Interview Questions
 
-1. **What are the three pagination styles in OmniAPI and how do their parameters differ?**
+1. **What are the three pagination styles in OminAPI and how do their parameters differ?**
    Offset/limit (`skip` + `limit`, DummyJSON), page-based (`page` + `per_page`, Open Brewery), and cursor-style emulation (treating `skip` as an advancing opaque cursor). Offset and cursor differ only conceptually — cursor treats the offset as opaque and advances it linearly.
 
 2. **What invariants should every offset-pagination test verify?**

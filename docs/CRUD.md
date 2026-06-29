@@ -1,13 +1,13 @@
 # CRUD
 
-> OmniAPI framework — Phase 3 repository pattern and CRUD operations.
-> Repo: <https://github.com/omiinayak25/omniapi-playwright-framework>
+> OminAPI framework — Phase 3 repository pattern and CRUD operations.
+> Repo: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 
 ## Overview
 
-OmniAPI implements the **Repository pattern** for every API resource. Tests call domain-language methods (`posts.create(...)`, `products.search(...)`, `bookings.remove(...)`) — never raw HTTP paths. A common abstract base (`BaseApiService`) enforces structure; concrete services absorb API quirks so test code stays clean regardless of the underlying API's oddities.
+OminAPI implements the **Repository pattern** for every API resource. Tests call domain-language methods (`posts.create(...)`, `products.search(...)`, `bookings.remove(...)`) — never raw HTTP paths. A common abstract base (`BaseApiService`) enforces structure; concrete services absorb API quirks so test code stays clean regardless of the underlying API's oddities.
 
 ---
 
@@ -127,7 +127,7 @@ JSONPlaceholder is a simulated API: it validates and echoes responses but does n
 test('CREATE — returns 201 with a server-assigned id', async ({ posts }) => {
   const payload: NewPost = {
     userId: 1,
-    title: 'OmniAPI Phase 3',
+    title: 'OminAPI Phase 3',
     body: 'Repository pattern in action',
   };
   const res = await posts.create(payload);
@@ -323,7 +323,7 @@ test('login -> create -> read -> update -> patch -> delete -> verify', async ({
 
 ## Interview Questions
 
-1. **What is the Repository pattern and why does OmniAPI use it?**
+1. **What is the Repository pattern and why does OminAPI use it?**
    A Repository provides domain-language methods over a data source (here, an API). Tests call `posts.create(...)`, not `client.post('/posts', ...)`. If the path or verb changes, only the repository file changes.
 
 2. **Why is `BaseApiService` abstract?**

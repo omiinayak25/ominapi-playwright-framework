@@ -20,7 +20,10 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 import type { PostmanEcho } from '../../src/types/httpbin.types.js';
 
+// Suite: exercises each core REST verb through the ApiClient facade.
 test.describe('Phase 2 · HTTP methods', () => {
+  // Scenario: a GET request to /get.
+  // Expected: 200/ok and the echoed URL reflects the path.
   test('GET retrieves a resource', async ({ echo }) => {
     const res = await echo.get<PostmanEcho>('/get');
 
@@ -29,14 +32,18 @@ test.describe('Phase 2 · HTTP methods', () => {
     expect(res.body.url).toContain('/get');
   });
 
+  // Scenario: POST a JSON payload to /post.
+  // Expected: 200 and the body is echoed back unchanged under `json`.
   test('POST creates a resource and echoes the JSON body', async ({ echo }) => {
-    const payload = { name: 'OmniAPI', phase: 2 };
+    const payload = { name: 'OminAPI', phase: 2 };
     const res = await echo.post<PostmanEcho>('/post', { data: payload });
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.json).toEqual(payload); // body round-tripped intact
   });
 
+  // Scenario: PUT a full replacement payload to /put.
+  // Expected: 200 and the payload round-trips under `json`.
   test('PUT replaces a resource', async ({ echo }) => {
     const payload = { id: 1, name: 'Replaced' };
     const res = await echo.put<PostmanEcho>('/put', { data: payload });
@@ -45,6 +52,8 @@ test.describe('Phase 2 · HTTP methods', () => {
     expect(res.body.json).toEqual(payload);
   });
 
+  // Scenario: PATCH a partial payload to /patch.
+  // Expected: 200 and only the patched field is echoed back.
   test('PATCH partially updates a resource', async ({ echo }) => {
     const res = await echo.patch<PostmanEcho>('/patch', {
       data: { name: 'Patched' },
@@ -54,6 +63,8 @@ test.describe('Phase 2 · HTTP methods', () => {
     expect(res.body.json).toEqual({ name: 'Patched' });
   });
 
+  // Scenario: DELETE against /delete.
+  // Expected: 200 and the echoed URL reflects the delete path.
   test('DELETE removes a resource', async ({ echo }) => {
     const res = await echo.del<PostmanEcho>('/delete');
 

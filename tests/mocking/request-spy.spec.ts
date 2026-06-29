@@ -13,6 +13,9 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { ApiKeyStrategy } from '../../src/auth/index.js';
 
 test.describe('Phase 15 · Request spying', () => {
+  // Send one POST with a body, custom header, and API-key auth; expect the
+  // server to have recorded exactly that request so we can assert what the
+  // client actually transmitted on the wire.
   test('captures method, path, headers and body the client sent', async ({
     mock,
   }) => {
@@ -35,6 +38,8 @@ test.describe('Phase 15 · Request spying', () => {
     expect(captured?.headers['x-correlation-id']).toBe('trace-abc');
   });
 
+  // Two sequential GETs; expect the recorded requests to preserve call order
+  // (FIFO), so callers can reason about sequencing.
   test('records multiple requests in order', async ({ mock }) => {
     const { server, client } = mock;
     server.stub('GET', '/a', { body: {} });

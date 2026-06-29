@@ -7,7 +7,7 @@ explanation of how tests are organised and how to add a new test.
 
 ## Overview
 
-OmniAPI is structured as a learning-progressive API test framework. Tests are
+OminAPI is structured as a learning-progressive API test framework. Tests are
 grouped into phase folders under `tests/`. Each phase teaches a specific
 concept — from basic HTTP verbs (Phase 2) to enterprise resilience patterns
 (Phase 20). All framework plumbing (clients, services, auth, validation) lives
@@ -23,8 +23,8 @@ dependencies, and copy `.env.example` to `.env`.
 Minimum commands:
 
 ```bash
-git clone https://github.com/omiinayak25/omniapi-playwright-framework.git
-cd omniapi-playwright-framework
+git clone https://github.com/omiinayak25/ominapi-playwright-framework.git
+cd ominapi-playwright-framework
 nvm use
 npm install
 cp .env.example .env
@@ -66,7 +66,7 @@ A passing run looks like this (times will vary):
 
 ```
 ┌─────────────────────────────────────────┐
-│          OmniAPI Test Summary           │
+│          OminAPI Test Summary           │
 ├─────────────────────────────────────────┤
 │  Total:    28    Passed:  28            │
 │  Failed:    0    Skipped:  0            │

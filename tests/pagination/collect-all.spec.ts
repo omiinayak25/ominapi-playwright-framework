@@ -13,6 +13,8 @@ import { PaginationHelper } from '../../src/utils/pagination.js';
 import type { Product } from '../../src/models/product.model.js';
 
 test.describe('Phase 10 · Collect-all pagination', () => {
+  // Drive collectAll over the whole dataset, then assert global invariants:
+  // no duplicate ids anywhere and at least the category's reported total.
   test('collectAll gathers a full filtered category across pages', async ({
     products,
   }) => {
@@ -38,6 +40,8 @@ test.describe('Phase 10 · Collect-all pagination', () => {
     expect(all.length).toBeGreaterThanOrEqual(total); // at least the category total
   });
 
+  // With a page-based source, collectAll should stop once a page comes back
+  // shorter than pageSize; expect a non-empty result and clean termination.
   test('collectAll terminates on a short final page', async ({ breweries }) => {
     // Page-based fetcher: Open Brewery pages are 1-based.
     const all = await PaginationHelper.collectAll(

@@ -21,11 +21,14 @@ const productSchema = contract.getResponseSchema(
 );
 const validator = SchemaValidator.getInstance();
 
+// Suite: verify the spec's version and that provider evolution stays compatible.
 test.describe('Phase 17 · Version validation', () => {
+  // Sanity: the contract exposes its declared semantic version.
   test('the contract declares its version', () => {
     expect(contract.version).toBe('1.0.0');
   });
 
+  // Forward-compatible: extra fields are tolerated as long as v1 requireds remain.
   test('a v2 provider that ADDS a field stays compatible with v1 contract', async ({
     mock,
   }) => {
@@ -45,6 +48,7 @@ test.describe('Phase 17 · Version validation', () => {
     expect(validator.validate(productSchema, res.body).valid).toBe(true);
   });
 
+  // Incompatible: removing a v1-required field fails validation against the old contract.
   test('a v2 provider that DROPS a required field breaks the contract', async ({
     mock,
   }) => {

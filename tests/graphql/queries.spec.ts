@@ -19,8 +19,11 @@ interface Country {
   emoji: string;
 }
 
+// Suite: GraphQL queries return exactly the selected fields with no errors.
 test.describe('Phase 14 · GraphQL queries', () => {
   test.describe.configure({ retries: 2 }); // external GraphQL endpoint can blip
+  // Scenario: query one country selecting a few fields.
+  // Expected: HTTP 200, no errors, and the returned country matches expected values.
   test('fetches a single country with selected fields', async ({
     countries,
   }) => {
@@ -44,6 +47,8 @@ test.describe('Phase 14 · GraphQL queries', () => {
     expect(data.country.emoji).toBeTruthy();
   });
 
+  // Scenario: query a list of countries filtered by continent.
+  // Expected: a non-empty list where every item has a valid 2-letter code.
   test('fetches a filtered list of countries', async ({ countries }) => {
     const res = await countries.query<{ countries: { code: string }[] }>(`
       {

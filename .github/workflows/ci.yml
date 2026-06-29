@@ -1,5 +1,5 @@
 # =============================================================================
-# ci.yml — OmniAPI Continuous Integration (GitHub Actions)
+# ci.yml — OminAPI Continuous Integration (GitHub Actions)
 # -----------------------------------------------------------------------------
 # PIPELINE:
 #   1) quality  — typecheck + lint + format check (fast static gate; fails early)

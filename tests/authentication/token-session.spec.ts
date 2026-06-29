@@ -25,6 +25,7 @@ import type {
   CreateBookingResponse,
 } from '../../src/models/booking.model.js';
 
+// Fixed payload reused as the resource under test; checkin precedes checkout.
 const sampleBooking: Booking = {
   firstname: 'Omni',
   lastname: 'Tester',
@@ -34,7 +35,11 @@ const sampleBooking: Booking = {
   additionalneeds: 'Breakfast',
 };
 
+// Suite: token login + cookie/session auth against the real Restful Booker API,
+// proving that authorization on protected mutations is genuinely enforced.
 test.describe('Phase 4 · Token login & Cookie/Session auth', () => {
+  // Scenario: POST /auth with valid credentials.
+  // Expected: a non-trivial token string (length > 5) is returned.
   test('login returns a session token', async ({ auth }) => {
     const token = await auth.loginBooker(
       config.credentials.username,
@@ -44,6 +49,10 @@ test.describe('Phase 4 · Token login & Cookie/Session auth', () => {
     expect(token.length).toBeGreaterThan(5);
   });
 
+  // Scenario: create a booking, attempt to delete it without auth, then delete it
+  // with a cookie token.
+  // Expected: create 200 -> unauthorized DELETE 403 -> authorized DELETE 201,
+  // demonstrating that the cookie token is what unlocks the protected operation.
   test('protected DELETE is forbidden without a token, allowed with it', async ({
     booker,
     auth,

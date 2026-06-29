@@ -23,7 +23,9 @@ interface ProductRow {
   category: string;
 }
 
+// Suite: validate each spreadsheet row against the live API (looped inside one test).
 test.describe('Phase 8 · Excel-driven product validation', () => {
+  // Async Excel load forces a single test; loop every row and assert price >= minPrice.
   test('every spreadsheet row validates against the live product API', async ({
     products,
   }) => {

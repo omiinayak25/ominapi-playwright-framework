@@ -86,8 +86,8 @@ at the `debug` level.
 ### Q6. How do I run tests in Docker?
 
 ```bash
-docker build -t omniapi .
-docker run --rm omniapi          # runs `npm run test:ci` inside the container
+docker build -t ominapi .
+docker run --rm ominapi          # runs `npm run test:ci` inside the container
 ```
 
 The `Dockerfile` installs dependencies and runs the CI test command. Useful for

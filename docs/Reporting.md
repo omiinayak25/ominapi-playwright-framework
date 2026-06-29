@@ -2,7 +2,7 @@
 
 ## Overview
 
-OmniAPI runs five reporters simultaneously on every test run. Four are configured in `playwright.config.ts`; one is the custom `SummaryReporter` implemented in `src/reporters/summary.reporter.ts`. Together they cover the spectrum from real-time terminal feedback to rich interactive dashboards to machine-readable CI artifacts.
+OminAPI runs five reporters simultaneously on every test run. Four are configured in `playwright.config.ts`; one is the custom `SummaryReporter` implemented in `src/reporters/summary.reporter.ts`. Together they cover the spectrum from real-time terminal feedback to rich interactive dashboards to machine-readable CI artifacts.
 
 ---
 
@@ -167,7 +167,7 @@ The `slowest` array contains the **top 5 slowest tests** sorted by `durationMs` 
 Printed to `process.stdout` at the end of every run:
 
 ```
-──────────── OmniAPI Run Summary ────────────
+──────────── OminAPI Run Summary ────────────
  result   : passed
  total    : 120
  passed   : 118

@@ -15,6 +15,8 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 10 · Filter / Sort / Search / Select', () => {
+  // Verify sort semantics, not just 200: re-sorting the returned prices locally
+  // must produce the same order the API returned.
   test('SORT — results are ordered by price ascending', async ({
     products,
   }) => {
@@ -26,6 +28,8 @@ test.describe('Phase 10 · Filter / Sort / Search / Select', () => {
     expect(prices).toEqual(sorted); // order is genuinely ascending
   });
 
+  // Filter correctness: the set is non-empty AND every item matches the
+  // requested category (no leakage of off-category items).
   test('FILTER — every product matches the requested category', async ({
     products,
   }) => {
@@ -37,6 +41,8 @@ test.describe('Phase 10 · Filter / Sort / Search / Select', () => {
     }
   });
 
+  // Search relevance: at least one result mentions the query term somewhere in
+  // its serialized form (match can be in any field, hence the JSON stringify).
   test('SEARCH — results relate to the query', async ({ products }) => {
     const res = await products.search('mascara');
     expect(res.body.products.length).toBeGreaterThan(0);
@@ -47,6 +53,8 @@ test.describe('Phase 10 · Filter / Sort / Search / Select', () => {
     ).toBe(true);
   });
 
+  // Sparse fieldset: requesting title+price should return those (plus the
+  // always-present id) and OMIT unrequested fields like description.
   test('SELECT — only requested fields are returned (sparse fieldset)', async ({
     products,
   }) => {
@@ -59,6 +67,8 @@ test.describe('Phase 10 · Filter / Sort / Search / Select', () => {
     expect(first).not.toHaveProperty('description');
   });
 
+  // Same filter-correctness check against a different (page-based) API: every
+  // returned brewery must be in the requested state.
   test('FILTER (page-based API) — breweries filtered by state', async ({
     breweries,
   }) => {

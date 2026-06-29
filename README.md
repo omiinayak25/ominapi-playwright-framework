@@ -1,10 +1,10 @@
 <div align="center">
 
-# OmniAPI
+# OminAPI
 
 ### Enterprise API Automation Framework — Playwright + TypeScript
 
-[![CI](https://github.com/omiinayak25/omniapi-playwright-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/omiinayak25/omniapi-playwright-framework/actions/workflows/ci.yml)
+[![CI](https://github.com/omiinayak25/ominapi-playwright-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/omiinayak25/ominapi-playwright-framework/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![Playwright](https://img.shields.io/badge/Playwright-API%20testing-2EAD33)
 ![Tests](https://img.shields.io/badge/tests-213%20passing-success)
@@ -145,8 +145,8 @@ GraphQL/WebSockets, mock dependencies, and wire enterprise-grade CI/CD.
 ### 1. Clone
 
 ```bash
-git clone https://github.com/omiinayak25/omniapi-playwright-framework.git
-cd omniapi-playwright-framework
+git clone https://github.com/omiinayak25/ominapi-playwright-framework.git
+cd ominapi-playwright-framework
 ```
 
 ### 2. Use the pinned Node version
@@ -185,8 +185,8 @@ npm run allure:open      # open the Allure report
 ### 7. Docker usage
 
 ```bash
-docker build -t omniapi .
-docker run --rm omniapi          # runs `npm run test:ci`
+docker build -t ominapi .
+docker run --rm ominapi          # runs `npm run test:ci`
 ```
 
 ### 8. CI/CD usage
@@ -201,7 +201,7 @@ and [azure-pipelines.yml](azure-pipelines.yml).
 ## 📁 Folder Structure
 
 ```
-omniapi-playwright-framework/
+ominapi-playwright-framework/
 ├── .github/workflows/ci.yml      # GitHub Actions: quality gate → sharded tests → report
 ├── .husky/pre-commit             # lint-staged quality gate
 ├── data/                         # Data-driven inputs (JSON, CSV, Excel, env/)
@@ -423,7 +423,7 @@ graph LR
 | With body logs     | `LOG_LEVEL=debug npm test`                          |
 | Different env      | `TEST_ENV=staging npm test`                         |
 | CI run             | `npm run test:ci`                                   |
-| Docker             | `docker run --rm omniapi`                           |
+| Docker             | `docker run --rm ominapi`                           |
 | Quality gate       | `npm run verify` (typecheck → lint → format → test) |
 
 > **Headed mode** does not apply to API tests (no browser UI). Use `--debug`/`--ui`

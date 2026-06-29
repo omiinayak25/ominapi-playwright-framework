@@ -1,6 +1,6 @@
 # Configuration
 
-How OmniAPI reads, validates, and distributes framework configuration —
+How OminAPI reads, validates, and distributes framework configuration —
 covering `ConfigManager`, `SecretsManager`, every environment variable, the
 typed config interfaces, and the fail-fast validation strategy.
 
@@ -270,7 +270,7 @@ a mysterious test failure 30 seconds in.
 It also logs a startup banner via the Winston logger:
 
 ```
-OmniAPI suite starting { env: 'dev', baseUrl: '...', logLevel: 'info', ci: false }
+OminAPI suite starting { env: 'dev', baseUrl: '...', logLevel: 'info', ci: false }
 ```
 
 This banner is captured in CI logs, providing an audit trail of which

@@ -1,8 +1,8 @@
-# HTTP Mocking — OmniAPI Framework
+# HTTP Mocking — OminAPI Framework
 
 ## Overview
 
-OmniAPI mocks HTTP dependencies through `MockServer`, an in-process real HTTP
+OminAPI mocks HTTP dependencies through `MockServer`, an in-process real HTTP
 server built on Node's `http` module. It is wired into tests via the `mock`
 fixture in `src/fixtures/api.fixtures.ts` and exercised in `tests/mocking/`.
 
@@ -17,7 +17,7 @@ fixture in `src/fixtures/api.fixtures.ts` and exercised in `tests/mocking/`.
 ### Why a real in-process server — not Playwright route interception?
 
 Playwright's `page.route()` / `context.route()` intercepts browser-page network
-traffic. Playwright's `APIRequestContext` — used by OmniAPI's `ApiClient` —
+traffic. Playwright's `APIRequestContext` — used by OminAPI's `ApiClient` —
 **does not go through the browser page** and therefore cannot be intercepted with
 route handlers.
 

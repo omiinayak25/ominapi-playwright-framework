@@ -15,6 +15,7 @@ import { ApiError, CircuitOpenError } from '../../src/utils/errors.js';
 test.describe('Phase 20 · Secrets management', () => {
   const secrets = SecretsManager.getInstance();
 
+  // A secret present in env is returned; a missing required secret throws, while getOptional yields undefined instead.
   test('reads a present secret and fails fast on a missing one', () => {
     process.env.OMNI_TEST_SECRET = 'super-secret-value';
     expect(secrets.get('OMNI_TEST_SECRET')).toBe('super-secret-value');
@@ -26,6 +27,7 @@ test.describe('Phase 20 · Secrets management', () => {
     expect(secrets.getOptional('DEFINITELY_MISSING_SECRET')).toBeUndefined();
   });
 
+  // mask() keeps only the edges of long values, fully hides short ones, and never leaks the middle of the secret.
   test('masks secrets for safe logging', () => {
     expect(secrets.mask('abcdefgh')).toBe('ab***gh');
     expect(secrets.mask('xy')).toBe('****'); // too short -> fully masked
@@ -35,6 +37,7 @@ test.describe('Phase 20 · Secrets management', () => {
 });
 
 test.describe('Phase 20 · Typed errors', () => {
+  // ApiError is a real Error/ApiError instance and exposes the status, path, and body it was constructed with.
   test('ApiError carries context and is identifiable', () => {
     const err = new ApiError('not found', 404, '/widgets/9', { error: 'nope' });
     expect(err).toBeInstanceOf(ApiError);
@@ -44,6 +47,7 @@ test.describe('Phase 20 · Typed errors', () => {
     expect(err.body).toEqual({ error: 'nope' });
   });
 
+  // CircuitOpenError is a distinct error subtype with its own name, so callers can branch on it.
   test('CircuitOpenError is its own type', () => {
     const err = new CircuitOpenError();
     expect(err).toBeInstanceOf(CircuitOpenError);

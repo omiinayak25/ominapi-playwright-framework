@@ -17,6 +17,7 @@
 import { test, expect } from '../../src/fixtures/api.fixtures.js';
 
 test.describe('Phase 2 · Content types', () => {
+  // A JSON endpoint yields isJson=true with a parsed object body and a JSON content-type.
   test('JSON response is parsed into an object', async ({ httpbin }) => {
     const res = await httpbin.get('/json');
 
@@ -26,6 +27,7 @@ test.describe('Phase 2 · Content types', () => {
     expect(typeof res.body).toBe('object');
   });
 
+  // An XML endpoint (Accept: application/xml) sets isJson=false and keeps the markup available via rawText without throwing.
   test('XML response is preserved as raw text (not forced into JSON)', async ({
     httpbin,
   }) => {

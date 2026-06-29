@@ -17,6 +17,7 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import type { HttpbinCookies } from '../../src/types/httpbin.types.js';
 
 test.describe('Phase 2 · Cookies', () => {
+  // Server sets a cookie via redirect, then a follow-up call on the same client echoes that cookie back — proving persistence.
   test('a cookie set by the server is sent back on the next request', async ({
     echo,
   }) => {

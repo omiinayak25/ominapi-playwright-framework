@@ -1,12 +1,12 @@
 # Installation
 
-A step-by-step guide to getting OmniAPI running locally, in Docker, and in CI.
+A step-by-step guide to getting OminAPI running locally, in Docker, and in CI.
 
 ---
 
 ## Overview
 
-OmniAPI is a Node.js/TypeScript project. Installation involves cloning the
+OminAPI is a Node.js/TypeScript project. Installation involves cloning the
 repository, selecting the correct Node version, installing npm dependencies,
 and providing a `.env` file. No browsers need to be downloaded because all
 tests target HTTP/GraphQL/WebSocket APIs.
@@ -29,8 +29,8 @@ tests target HTTP/GraphQL/WebSocket APIs.
 ## Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/omiinayak25/omniapi-playwright-framework.git
-cd omniapi-playwright-framework
+git clone https://github.com/omiinayak25/ominapi-playwright-framework.git
+cd ominapi-playwright-framework
 ```
 
 ---
@@ -145,10 +145,10 @@ because all tests are API-only.
 
 ```bash
 # Build the image
-docker build -t omniapi .
+docker build -t ominapi .
 
 # Run the suite (executes npm run test:ci inside the container)
-docker run --rm omniapi
+docker run --rm ominapi
 ```
 
 To inject environment variables at runtime:
@@ -157,7 +157,7 @@ To inject environment variables at runtime:
 docker run --rm \
   -e BASE_URL=https://my-staging-api.example.com \
   -e TEST_ENV=staging \
-  omniapi
+  ominapi
 ```
 
 ---

@@ -12,6 +12,9 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 
 test.describe('Phase 15 · Stub responses', () => {
+  // Stub a POST to return 201 with a Location and custom header; expect the
+  // client to surface the exact status, body, and both headers — verifying
+  // created-resource handling without a real server.
   test('forces a 201 Created with custom headers', async ({ mock }) => {
     const { server, client } = mock;
     server.stub('POST', '/items', {
@@ -30,6 +33,8 @@ test.describe('Phase 15 · Stub responses', () => {
     expect(res.headers['x-request-id']).toBe('mock-123');
   });
 
+  // Stub a forced 500; expect the client to propagate the error status and
+  // body so failure-path logic can be exercised on demand.
   test('forces a 500 error to test failure handling', async ({ mock }) => {
     const { server, client } = mock;
     server.stub('GET', '/flaky', {

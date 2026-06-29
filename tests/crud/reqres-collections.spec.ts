@@ -32,9 +32,11 @@ const PATH = '/api/collections/products/records';
 const PROJECT_ID = '33261';
 const API_KEY = process.env.REQRES_API_KEY;
 
+// Suite: prove the framework can test a custom, API-key-protected endpoint.
 test.describe('ReqRes collections (custom API-key example)', () => {
   test.describe.configure({ retries: 2 }); // public API — absorb transient blips
 
+  // Negative auth: omitting the key (NoAuthStrategy) -> 401 missing_api_key.
   test('is protected: returns 401 without an API key', async ({ reqres }) => {
     const res = await reqres.get(PATH, {
       params: { project_id: PROJECT_ID },
@@ -45,6 +47,7 @@ test.describe('ReqRes collections (custom API-key example)', () => {
     expect(res.body).toMatchObject({ error: 'missing_api_key' });
   });
 
+  // Happy path (skipped without a key): a valid x-api-key returns schema-valid records.
   test('returns records when a valid API key is supplied', async ({
     reqres,
   }) => {

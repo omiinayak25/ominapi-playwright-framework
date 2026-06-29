@@ -1,7 +1,7 @@
 # Contract Testing — OpenAPI Validation and Breaking-Change Detection
 
 > **Modules:** `src/utils/openapi.ts` · `src/utils/contract-diff.ts` · `src/contracts/product-api.openapi.json`
-> **Repo:** <https://github.com/omiinayak25/omniapi-playwright-framework>
+> **Repo:** <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 
@@ -136,7 +136,7 @@ without any further `$ref` references.
 // src/contracts/product-api.openapi.json (abridged)
 {
   "openapi": "3.0.3",
-  "info": { "title": "OmniAPI Product Contract", "version": "1.0.0" },
+  "info": { "title": "OminAPI Product Contract", "version": "1.0.0" },
   "paths": {
     "/products/{id}": {
       "get": {

@@ -15,22 +15,33 @@ import { BookingFactory } from '../../src/builders/index.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 import type { CreateBookingResponse } from '../../src/models/booking.model.js';
 
+// Suite: BookingFactory named scenarios (valid/minimal/withDeposit/invalid),
+// uniqueness guarantees, plus one live integration against Restful Booker.
 test.describe('Phase 5 · BookingFactory', () => {
+  // Scenario: the default valid() preset.
+  // Expected: required fields (name, checkin) are populated.
   test('valid() returns a complete booking', () => {
     const b = BookingFactory.valid();
     expect(b.firstname).toBeTruthy();
     expect(b.bookingdates.checkin).toBeTruthy();
   });
 
+  // Scenario: withDeposit(true/false) preset.
+  // Expected: depositpaid mirrors the requested boolean in both directions.
   test('withDeposit() forces the deposit flag', () => {
     expect(BookingFactory.withDeposit(true).depositpaid).toBe(true);
     expect(BookingFactory.withDeposit(false).depositpaid).toBe(false);
   });
 
+  // Scenario: the minimal() preset.
+  // Expected: optional additionalneeds is absent.
   test('minimal() omits the optional field', () => {
     expect(BookingFactory.minimal().additionalneeds).toBeUndefined();
   });
 
+  // Scenario: collect firstnames from 10 valid() calls into a Set.
+  // Expected: more than one distinct value — output varies per call (Faker-backed),
+  // which matters for avoiding collisions on stateful APIs.
   test('successive valid() calls produce different data (uniqueness)', () => {
     const names = new Set(
       Array.from({ length: 10 }, () => BookingFactory.valid().firstname),
@@ -39,6 +50,8 @@ test.describe('Phase 5 · BookingFactory', () => {
     expect(names.size).toBeGreaterThan(1);
   });
 
+  // Scenario: the invalid() preset built for negative tests.
+  // Expected: firstname present but required lastname/totalprice deliberately missing.
   test('invalid() is intentionally incomplete', () => {
     const bad = BookingFactory.invalid();
     expect(bad.firstname).toBeTruthy();
@@ -46,6 +59,9 @@ test.describe('Phase 5 · BookingFactory', () => {
     expect(bad.totalprice).toBeUndefined();
   });
 
+  // Scenario: POST a forGuest()-built payload to the real Restful Booker API.
+  // Expected: 200 with a positive bookingid, and the echoed guest name matches —
+  // confirming dynamically generated payloads work end-to-end against a live API.
   test('END-TO-END: a factory booking creates successfully on Booker', async ({
     booker,
   }) => {

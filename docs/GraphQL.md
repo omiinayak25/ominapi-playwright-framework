@@ -1,8 +1,8 @@
-# GraphQL Testing — OmniAPI Framework
+# GraphQL Testing — OminAPI Framework
 
 ## Overview
 
-OmniAPI provides first-class GraphQL support through `GraphQLClient`, a thin layer
+OminAPI provides first-class GraphQL support through `GraphQLClient`, a thin layer
 over `ApiClient` that handles the GraphQL transport contract and response envelope.
 Two real public APIs are exercised in the test suite:
 
@@ -212,11 +212,11 @@ const mutation = `
 `;
 
 const res = await graphqlZero.mutate<CreatedPost>(mutation, {
-  input: { title: 'OmniAPI Phase 14', body: 'GraphQL mutation test' },
+  input: { title: 'OminAPI Phase 14', body: 'GraphQL mutation test' },
 });
 
 const data = graphqlData(res);
-expect(data.createPost.title).toBe('OmniAPI Phase 14');
+expect(data.createPost.title).toBe('OminAPI Phase 14');
 expect(data.createPost.id).toBeTruthy();
 ```
 

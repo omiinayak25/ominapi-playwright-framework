@@ -18,10 +18,13 @@
 import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import type { PostmanEcho } from '../../src/types/httpbin.types.js';
 
+// Suite: covers JSON and url-encoded request bodies plus response body reading.
 test.describe('Phase 2 · Request & response bodies', () => {
+  // Scenario: POST a nested JSON object via `data`.
+  // Expected: response is JSON and the full structure round-trips under `json`.
   test('JSON request body is serialized and echoed back', async ({ echo }) => {
     const payload = {
-      framework: 'OmniAPI',
+      framework: 'OminAPI',
       nested: { level: 2, tags: ['api', 'playwright'] },
     };
 
@@ -33,6 +36,8 @@ test.describe('Phase 2 · Request & response bodies', () => {
     expect(res.body.json).toEqual(payload);
   });
 
+  // Scenario: POST a form via `form` (x-www-form-urlencoded).
+  // Expected: values arrive as strings under `form`.
   test('url-encoded form body is transmitted correctly', async ({ echo }) => {
     const res = await echo.post<PostmanEcho>('/post', {
       form: { username: 'omni', remember: true },
@@ -43,6 +48,8 @@ test.describe('Phase 2 · Request & response bodies', () => {
     expect(res.body.form).toMatchObject({ username: 'omni', remember: 'true' });
   });
 
+  // Scenario: send a `data` body without manually setting a Content-Type.
+  // Expected: the client auto-sets Content-Type to application/json.
   test('Content-Type is automatically set to JSON for `data` bodies', async ({
     echo,
   }) => {

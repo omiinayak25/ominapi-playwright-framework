@@ -13,7 +13,9 @@ import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import { HttpStatus } from '../../src/constants/http-status.js';
 import type { NewProduct } from '../../src/models/product.model.js';
 
+// Suite: CRUD + search against DummyJSON, whose real-world quirks the repo hides.
 test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
+  // GET list -> paging envelope where the page size matches the requested limit.
   test('READ ALL — returns a paging envelope honoring the limit', async ({
     products,
   }) => {
@@ -25,6 +27,7 @@ test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
     expect(res.body.limit).toBe(5);
   });
 
+  // GET by id -> 200 with the matching product.
   test('READ ONE — returns the requested product', async ({ products }) => {
     const res = await products.getById(1);
 
@@ -33,6 +36,7 @@ test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
     expect(res.body.price).toBeGreaterThan(0);
   });
 
+  // GET /search -> non-empty results that actually relate to the query term.
   test('SEARCH — returns products matching the query', async ({ products }) => {
     const res = await products.search('mascara');
 
@@ -44,9 +48,10 @@ test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
     expect(JSON.stringify(first).toLowerCase()).toContain('mascara');
   });
 
+  // POST /products/add (non-RESTful path) -> 201 with an echoed body and new id.
   test('CREATE — POST /products/add returns a new id', async ({ products }) => {
     const payload: NewProduct = {
-      title: 'OmniAPI Test Widget',
+      title: 'OminAPI Test Widget',
       price: 42,
       category: 'tools',
     };
@@ -58,6 +63,7 @@ test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
     expect(res.body.id).toBeGreaterThan(0); // DummyJSON assigns the next id
   });
 
+  // PUT -> updated fields reflected on the returned product.
   test('UPDATE (PUT) — replaces fields on a product', async ({ products }) => {
     const res = await products.update(1, { title: 'Renamed Product' });
 
@@ -66,6 +72,7 @@ test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
     expect(res.body.title).toBe('Renamed Product');
   });
 
+  // PATCH -> only the supplied field changes.
   test('PATCH — partial update of a product', async ({ products }) => {
     const res = await products.patch(1, { price: 999 });
 
@@ -74,6 +81,7 @@ test.describe('Phase 3 · Products CRUD (paging envelope & search)', () => {
     expect(res.body.price).toBe(999);
   });
 
+  // DELETE -> soft delete: body carries isDeleted/deletedOn rather than vanishing.
   test('DELETE — returns the product with soft-delete metadata', async ({
     products,
   }) => {

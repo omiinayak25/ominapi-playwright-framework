@@ -17,7 +17,10 @@
 import { test, expect } from '../../src/fixtures/api.fixtures.js';
 import type { PostmanEcho } from '../../src/types/httpbin.types.js';
 
+// Suite: covers query-string and path parameter handling.
 test.describe('Phase 2 · Parameters', () => {
+  // Scenario: pass mixed-type query params via the `params` option.
+  // Expected: all values arrive (echoed as strings) under `args`, correctly encoded.
   test('query parameters are encoded and sent correctly', async ({ echo }) => {
     const res = await echo.get<PostmanEcho>('/get', {
       params: { page: 2, search: 'omni api', active: true },
@@ -30,6 +33,8 @@ test.describe('Phase 2 · Parameters', () => {
     expect(res.body.args.active).toBe('true');
   });
 
+  // Scenario: a path parameter built into the URL (/status/{code}).
+  // Expected: the server responds with the status matching the path value.
   test('path parameter selects a specific resource', async ({ echo }) => {
     // The {code} segment is a PATH parameter identifying the resource.
     const code = 404;
@@ -37,6 +42,8 @@ test.describe('Phase 2 · Parameters', () => {
     expect(res.status).toBe(code);
   });
 
+  // Scenario: a query value containing reserved characters (&, =, space).
+  // Expected: the encoder transmits them safely and the original value is echoed back.
   test('special characters in query values are safely encoded', async ({
     echo,
   }) => {

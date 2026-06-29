@@ -1,13 +1,13 @@
-# OmniAPI Framework — Architecture
+# OminAPI Framework — Architecture
 
 ## Overview
 
-OmniAPI is a strict-TypeScript, Playwright-based API test framework organized in
+OminAPI is a strict-TypeScript, Playwright-based API test framework organized in
 distinct layers. Each layer has a single responsibility and depends only on the
 layers below it. This separation keeps tests readable, infrastructure swappable,
 and cross-cutting concerns (auth, retry, middleware) isolated.
 
-Repository: <https://github.com/omiinayak25/omniapi-playwright-framework>
+Repository: <https://github.com/omiinayak25/ominapi-playwright-framework>
 
 ---
 
@@ -15,7 +15,7 @@ Repository: <https://github.com/omiinayak25/omniapi-playwright-framework>
 
 Playwright's `APIRequestContext` is a capable but low-level primitive. Without a
 structured framework every test would repeat header merging, JSON parsing, timing,
-logging, auth, and response normalization. OmniAPI removes all of that boilerplate
+logging, auth, and response normalization. OminAPI removes all of that boilerplate
 so a test expresses intent only:
 
 ```typescript
